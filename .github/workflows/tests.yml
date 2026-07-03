@@ -54,15 +54,15 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
+      # history из прошлого отчёта подкладывается в results — так Allure строит тренды
       - name: Build Allure report with history
         if: always()
-        uses: simple-elf/allure-report-action@v1
-        with:
-          allure_results: build/allure-results
-          gh_pages: gh-pages
-          allure_report: allure-report
-          allure_history: allure-history
-          keep_reports: 20
+        run: |
+          curl -sLo allure.tgz https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.29.0/allure-commandline-2.29.0.tgz
+          tar -xzf allure.tgz
+          mkdir -p build/allure-results
+          if [ -d gh-pages/history ]; then cp -r gh-pages/history build/allure-results/history; fi
+          allure-2.29.0/bin/allure generate build/allure-results -o allure-report --clean
 
       - name: Publish Allure report to GitHub Pages
         if: always()
@@ -70,7 +70,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: allure-history
+          publish_dir: allure-report
 
       - name: Telegram notification
         if: always()
@@ -84,10 +84,10 @@ jobs:
               "logo": "",
               "project": "${{ github.repository }}",
               "environment": "GitHub Actions",
-              "reportLink": "https://menand.github.io/Qa.Guru.40.Diploma/${{ github.run_number }}/",
+              "reportLink": "https://menand.github.io/Qa.Guru.40.Diploma/",
               "comment": "задача: ${{ github.event.inputs.task || 'api_test' }} (${{ github.event_name }})",
               "language": "ru",
-              "allureFolder": "allure-history/${{ github.run_number }}",
+              "allureFolder": "allure-report",
               "enableChart": true
             },
             "telegram": {
