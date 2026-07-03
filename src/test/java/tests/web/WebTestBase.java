@@ -44,10 +44,6 @@ public abstract class WebTestBase {
         // SPA грузит тяжёлый лендинг: ждём только DOMContentLoaded и даём запас на холодный старт
         Configuration.pageLoadStrategy = "eager";
         Configuration.pageLoadTimeout = 60_000;
-        // page source при падении прикладывает AllureSelenide напрямую через WebDriver;
-        // встроенный экстрактор Selenide нельзя: selenide-appium подменяет его своим,
-        // который аугментирует драйвер CDP-соединением и падает на Selenoid по websocket
-        Configuration.savePageSource = false;
 
         MutableCapabilities options = browserOptions(Configs.WEB.browser());
         if (!Configs.WEB.remoteUrl().isBlank()) {

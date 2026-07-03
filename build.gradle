@@ -31,14 +31,30 @@ allure {
     }
 }
 
+// mobile-тесты живут в отдельном source set: selenide-appium глобально подменяет
+// плагины Selenide (page source, описание элементов) и ломает web-прогоны через Selenoid
+sourceSets {
+    mobileTest {
+        java.srcDirs = ['src/mobileTest/java']
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
+}
+
+configurations {
+    mobileTestImplementation.extendsFrom testImplementation
+    mobileTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 dependencies {
     testImplementation platform("org.junit:junit-bom:${junitVersion}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     testImplementation "com.codeborne:selenide:${selenideVersion}"
-    testImplementation "com.codeborne:selenide-appium:${selenideVersion}"
     testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
-    testImplementation "io.appium:java-client:${appiumVersion}"
+
+    mobileTestImplementation "com.codeborne:selenide-appium:${selenideVersion}"
+    mobileTestImplementation "io.appium:java-client:${appiumVersion}"
 
     testImplementation "io.qameta.allure:allure-selenide:${allureVersion}"
     testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
@@ -66,14 +82,7 @@ tasks.withType(Test).configureEach {
     }
 }
 
-// мобильным тестам нужны BrowserStack-креды — по умолчанию (gradlew test/build) их не гоняем
-test {
-    useJUnitPlatform {
-        excludeTags 'mobile'
-    }
-}
-
-['api', 'web', 'mobile'].each { layer ->
+['api', 'web'].each { layer ->
     tasks.register("${layer}_test", Test) {
         group = 'verification'
         description = "Runs ${layer} tests"
@@ -87,5 +96,19 @@ test {
                 maxFailures = 10
             }
         }
+    }
+}
+
+tasks.register('mobile_test', Test) {
+    group = 'verification'
+    description = 'Runs mobile tests on BrowserStack'
+    testClassesDirs = sourceSets.mobileTest.output.classesDirs
+    classpath = sourceSets.mobileTest.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'mobile'
+    }
+    retry {
+        maxRetries = 2
+        maxFailures = 10
     }
 }
