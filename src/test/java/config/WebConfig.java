@@ -12,8 +12,14 @@ public interface WebConfig extends Config {
     @Key("baseUrl")
     String baseUrl();
 
+    /** chrome или firefox. */
     @Key("browser")
     String browser();
+
+    /** Версия браузера для Selenoid/Grid; пусто — любая доступная. */
+    @Key("browserVersion")
+    @DefaultValue("")
+    String browserVersion();
 
     @Key("browserSize")
     String browserSize();
@@ -22,6 +28,11 @@ public interface WebConfig extends Config {
     @Key("remoteUrl")
     @DefaultValue("")
     String remoteUrl();
+
+    /** Запись видео в Selenoid (учитывается только вместе с remoteUrl). */
+    @Key("videoEnabled")
+    @DefaultValue("true")
+    boolean videoEnabled();
 
     @Key("timeout")
     long timeout();

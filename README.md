@@ -99,18 +99,21 @@
 ./gradlew api_test                      # только API
 ./gradlew web_test                      # web, локальный Chrome
 ./gradlew web_test -Dheadless=true      # web без окна браузера
-./gradlew web_test "-DremoteUrl=https://user:pass@selenoid.example.com/wd/hub"   # web в Selenoid
+./gradlew web_test -Dbrowser=firefox -DbrowserSize=1280x1024        # другой браузер и размер окна
+./gradlew web_test "-DremoteUrl=https://user:pass@selenoid.example.com/wd/hub" -DbrowserVersion=128   # Selenoid
 ./gradlew mobile_test                   # mobile на BrowserStack (нужны креды, см. ниже)
 ./gradlew test                          # api + web (mobile исключён по умолчанию)
 ```
 
-| Свойство      | По умолчанию           | Назначение                          |
-|---------------|------------------------|-------------------------------------|
-| `baseUrl`     | `https://habitica.com` | стенд web-тестов                    |
-| `browser`     | `chrome`               | браузер                             |
-| `browserSize` | `1920x1080`            | размер окна                         |
-| `headless`    | `false`                | headless-режим                      |
-| `remoteUrl`   | *(пусто)*              | Selenoid/Grid; пусто — локальный    |
+| Свойство         | По умолчанию           | Назначение                                        |
+|------------------|------------------------|---------------------------------------------------|
+| `baseUrl`        | `https://habitica.com` | стенд web-тестов                                  |
+| `browser`        | `chrome`               | браузер: `chrome` / `firefox`                     |
+| `browserVersion` | *(пусто)*              | версия браузера для Selenoid; пусто — любая       |
+| `browserSize`    | `1920x1080`            | размер окна                                       |
+| `headless`       | `false`                | headless-режим                                    |
+| `remoteUrl`      | *(пусто)*              | Selenoid/Grid; пусто — локальный браузер          |
+| `videoEnabled`   | `true`                 | запись видео в Selenoid (только с `remoteUrl`)    |
 
 Для мобильных тестов приложение должно быть загружено в BrowserStack
 (custom_id `habitica-android`, см. `browserstack.properties`), креды передаются через
@@ -118,24 +121,31 @@
 
 ## Запуск в Jenkins
 
-Параметризованная джоба с выбором слоя (Active Choices Parameter `TASK`):
+Параметризованная джоба (Active Choices / Choice Parameters):
 
-```groovy
-return ["web_test:selected", "api_test", "mobile_test", "test"]
-```
+| Параметр          | Значения (Groovy return для Active Choices)                          |
+|-------------------|----------------------------------------------------------------------|
+| `TASK`            | `return ["web_test:selected", "api_test", "mobile_test", "test"]`   |
+| `BROWSER`         | `return ["chrome:selected", "firefox"]`                              |
+| `BROWSER_VERSION` | `return ["128:selected", "127", "125"]` — версии из вашего Selenoid  |
+| `BROWSER_SIZE`    | `return ["1920x1080:selected", "1280x1024", "1024x768"]`             |
+| `REMOTE_URL`      | строковый параметр, `https://user:pass@selenoid.example.com/wd/hub`  |
 
 Шаг сборки:
 
 ```bash
 ./gradlew clean ${TASK} \
-  -Dheadless=true \
+  -Dbrowser=${BROWSER} \
+  -DbrowserVersion=${BROWSER_VERSION} \
+  -DbrowserSize=${BROWSER_SIZE} \
   "-DremoteUrl=${REMOTE_URL}" \
   -DBROWSERSTACK_USER=${BROWSERSTACK_USER} \
   -DBROWSERSTACK_KEY=${BROWSERSTACK_KEY}
 ```
 
-`REMOTE_URL` нужен только для `web_test` (Selenoid), креды BrowserStack — только для `mobile_test`;
-лишние свойства безвредны. После сборки Allure-плагин Jenkins публикует отчёт из `build/allure-results`.
+Браузерные свойства и `REMOTE_URL` влияют только на `web_test`, креды BrowserStack — только на
+`mobile_test`; лишние свойства безвредны, поэтому shell-шаг один на все варианты. После сборки
+Allure-плагин Jenkins публикует отчёт из `build/allure-results`.
 
 ## Allure-отчёт
 

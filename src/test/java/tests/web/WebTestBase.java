@@ -16,7 +16,9 @@ import io.qameta.allure.selenide.AllureSelenide;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import web.pages.HomePage;
 import web.pages.TasksPage;
 
@@ -36,21 +38,42 @@ public abstract class WebTestBase {
         Configuration.browserSize = Configs.WEB.browserSize();
         Configuration.timeout = Configs.WEB.timeout();
         Configuration.headless = Configs.WEB.headless();
+        if (!Configs.WEB.browserVersion().isBlank()) {
+            Configuration.browserVersion = Configs.WEB.browserVersion();
+        }
         // SPA грузит тяжёлый лендинг: ждём только DOMContentLoaded и даём запас на холодный старт
         Configuration.pageLoadStrategy = "eager";
         Configuration.pageLoadTimeout = 60_000;
-        // тексты и плейсхолдеры в тестах английские — фиксируем локаль браузера
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--lang=en-US", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu");
-        options.setExperimentalOption("prefs", Map.of("intl.accept_languages", "en-US"));
+
+        MutableCapabilities options = browserOptions(Configs.WEB.browser());
         if (!Configs.WEB.remoteUrl().isBlank()) {
             Configuration.remote = Configs.WEB.remoteUrl();
-            // Selenoid: видео и VNC для отладки удалённых прогонов
-            options.setCapability("selenoid:options", Map.of("enableVNC", true, "enableVideo", true));
+            // Selenoid: VNC для отладки, видео по флагу videoEnabled
+            options.setCapability("selenoid:options",
+                    Map.of("enableVNC", true, "enableVideo", Configs.WEB.videoEnabled()));
         }
         Configuration.browserCapabilities = options;
         SelenideLogger.addListener("AllureSelenide",
                 new AllureSelenide().screenshots(true).savePageSource(true));
+    }
+
+    /** Опции под конкретный браузер; локаль en-US — тексты в тестах английские. */
+    private static MutableCapabilities browserOptions(String browser) {
+        switch (browser.toLowerCase()) {
+            case "chrome": {
+                ChromeOptions chrome = new ChromeOptions();
+                chrome.addArguments("--lang=en-US", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu");
+                chrome.setExperimentalOption("prefs", Map.of("intl.accept_languages", "en-US"));
+                return chrome;
+            }
+            case "firefox": {
+                FirefoxOptions firefox = new FirefoxOptions();
+                firefox.addPreference("intl.accept_languages", "en-US, en");
+                return firefox;
+            }
+            default:
+                return new MutableCapabilities();
+        }
     }
 
     /** Общий пользователь для авторизованных web-тестов (без приветственного онбординга). */
