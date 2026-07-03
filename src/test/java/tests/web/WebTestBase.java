@@ -43,6 +43,11 @@ public abstract class WebTestBase {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--lang=en-US", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu");
         options.setExperimentalOption("prefs", Map.of("intl.accept_languages", "en-US"));
+        if (!Configs.WEB.remoteUrl().isBlank()) {
+            Configuration.remote = Configs.WEB.remoteUrl();
+            // Selenoid: видео и VNC для отладки удалённых прогонов
+            options.setCapability("selenoid:options", Map.of("enableVNC", true, "enableVideo", true));
+        }
         Configuration.browserCapabilities = options;
         SelenideLogger.addListener("AllureSelenide",
                 new AllureSelenide().screenshots(true).savePageSource(true));

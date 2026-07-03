@@ -18,6 +18,11 @@ public interface WebConfig extends Config {
     @Key("browserSize")
     String browserSize();
 
+    /** URL Selenoid/Selenium Grid; пусто — локальный браузер. */
+    @Key("remoteUrl")
+    @DefaultValue("")
+    String remoteUrl();
+
     @Key("timeout")
     long timeout();
 
