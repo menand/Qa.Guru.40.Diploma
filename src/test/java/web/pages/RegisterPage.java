@@ -4,6 +4,8 @@ import com.codeborne.selenide.ClickOptions;
 import com.codeborne.selenide.SelenideElement;
 import io.qameta.allure.Step;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.selected;
 import static com.codeborne.selenide.Condition.text;
@@ -56,6 +58,9 @@ public class RegisterPage {
         HomePage.acceptCookiesIfShown();
         tosCheckbox.click(ClickOptions.usingJavaScript());
         tosCheckbox.shouldBe(selected);
-        $$("button").findBy(text("Get Started")).click();
+        // кнопка активируется после асинхронной проверки доступности username
+        $$("button").findBy(text("Get Started"))
+                .shouldBe(enabled, Duration.ofSeconds(30))
+                .click();
     }
 }

@@ -36,8 +36,9 @@ public abstract class WebTestBase {
         Configuration.browserSize = Configs.WEB.browserSize();
         Configuration.timeout = Configs.WEB.timeout();
         Configuration.headless = Configs.WEB.headless();
-        // SPA грузит тяжёлый лендинг: ждём только DOMContentLoaded
+        // SPA грузит тяжёлый лендинг: ждём только DOMContentLoaded и даём запас на холодный старт
         Configuration.pageLoadStrategy = "eager";
+        Configuration.pageLoadTimeout = 60_000;
         // тексты и плейсхолдеры в тестах английские — фиксируем локаль браузера
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--lang=en-US", "--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu");

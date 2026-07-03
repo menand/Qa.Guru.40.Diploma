@@ -7,9 +7,11 @@ import io.restassured.specification.FilterableRequestSpecification;
 import io.restassured.specification.FilterableResponseSpecification;
 
 /**
- * Habitica ограничивает клиента 30 запросами в минуту.
- * Когда лимит почти исчерпан — ждём начала следующего окна,
- * чтобы тесты не падали с 429 Too Many Requests.
+ * Habitica ограничивает клиента 30 запросами в минуту (анонимные запросы — по IP).
+ * Когда лимит почти исчерпан — ждём начала следующего окна, чтобы тесты
+ * не падали с 429 Too Many Requests. Повторить запрос внутри фильтра нельзя
+ * (цепочка фильтров REST Assured одноразовая), поэтому холодный старт JVM
+ * с уже исчерпанным окном обрабатывается в {@link helpers.TestUsers}.
  */
 public class RateLimitFilter implements Filter {
 

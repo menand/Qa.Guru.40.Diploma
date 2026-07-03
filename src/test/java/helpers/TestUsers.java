@@ -19,11 +19,28 @@ public final class TestUsers {
      */
     public static synchronized UserCredentials shared() {
         if (shared == null) {
-            shared = AuthApi.register(randomRegisterRequest());
+            shared = registerWithRateLimitRetry();
             UserCredentials toDelete = shared;
             Runtime.getRuntime().addShutdownHook(new Thread(() -> AuthApi.deleteUser(toDelete)));
         }
         return shared;
+    }
+
+    /**
+     * Регистрация — первый запрос прогона: окно rate limit мог исчерпать
+     * предыдущий запуск с этого же IP. Один повтор после полного окна.
+     */
+    private static UserCredentials registerWithRateLimitRetry() {
+        try {
+            return AuthApi.register(randomRegisterRequest());
+        } catch (AssertionError firstAttempt) {
+            try {
+                Thread.sleep(61_000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return AuthApi.register(randomRegisterRequest());
+        }
     }
 
     public static RegisterRequest randomRegisterRequest() {
