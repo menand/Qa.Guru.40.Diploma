@@ -1,0 +1,100 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'images/**'
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Слой тестов'
+        type: choice
+        default: web_test
+        options:
+          - api_test
+          - web_test
+          - mobile_test
+          - test
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tests-${{ github.ref }}
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # web бежит в headless Chrome раннера (предустановлен) — Selenoid не нужен;
+      # лишние свойства для api/mobile безвредны
+      - name: Run ${{ github.event.inputs.task || 'api_test' }}
+        run: >
+          ./gradlew ${{ github.event.inputs.task || 'api_test' }}
+          -Dheadless=true
+          -DBROWSERSTACK_USER=${{ secrets.BROWSERSTACK_USER }}
+          -DBROWSERSTACK_KEY=${{ secrets.BROWSERSTACK_KEY }}
+
+      - name: Checkout gh-pages for Allure history
+        if: always()
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build Allure report with history
+        if: always()
+        uses: simple-elf/allure-report-action@v1
+        with:
+          allure_results: build/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: Publish Allure report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      - name: Telegram notification
+        if: always()
+        continue-on-error: true
+        run: |
+          wget -q https://github.com/qa-guru/allure-notifications/releases/download/4.11.0/allure-notifications-4.11.0.jar
+          mkdir -p notifications
+          cat > notifications/config.json <<EOF
+          {
+            "base": {
+              "logo": "",
+              "project": "${{ github.repository }}",
+              "environment": "GitHub Actions",
+              "reportLink": "https://menand.github.io/Qa.Guru.40.Diploma/${{ github.run_number }}/",
+              "comment": "задача: ${{ github.event.inputs.task || 'api_test' }} (${{ github.event_name }})",
+              "language": "ru",
+              "allureFolder": "allure-history/${{ github.run_number }}",
+              "enableChart": true
+            },
+            "telegram": {
+              "token": "${{ secrets.TELEGRAM_TOKEN }}",
+              "chat": "${{ secrets.TELEGRAM_CHAT }}",
+              "replyTo": ""
+            }
+          }
+          EOF
+          java "-DconfigFile=notifications/config.json" -jar allure-notifications-4.11.0.jar

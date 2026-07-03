@@ -1,5 +1,7 @@
 # Дипломный проект: автоматизация тестирования [Habitica](https://habitica.com)
 
+[![tests](https://github.com/menand/Qa.Guru.40.Diploma/actions/workflows/tests.yml/badge.svg)](https://github.com/menand/Qa.Guru.40.Diploma/actions/workflows/tests.yml)
+
 <p align="center">
   <a href="https://habitica.com/static/home">
     <img src="images/screenshots/habitica_home.png" alt="Habitica" width="900"/>
@@ -18,6 +20,7 @@
 - [Особенности проекта](#особенности-проекта)
 - [Запуск тестов](#запуск-тестов)
 - [Запуск в Jenkins](#запуск-в-jenkins)
+- [GitHub Actions](#github-actions)
 - [Allure-отчёт](#allure-отчёт)
 - [Структура проекта](#структура-проекта)
 
@@ -151,10 +154,23 @@
 `mobile_test`; лишние свойства безвредны, поэтому shell-шаг один на все варианты. После сборки
 Allure-плагин Jenkins публикует отчёт из `build/allure-results`.
 
+## GitHub Actions
+
+Второй, независимый CI — [workflow `tests`](https://github.com/menand/Qa.Guru.40.Diploma/actions/workflows/tests.yml):
+
+- **на каждый push в `main`** автоматически бежит `api_test`;
+- **вручную** (Run workflow) запускается любой слой: `api_test` / `web_test` / `mobile_test` / `test`;
+- web-тесты идут в headless Chrome самого раннера — Selenoid не нужен;
+- mobile-тесты ходят в BrowserStack (креды в GitHub Secrets);
+- после прогона Allure-отчёт с историей публикуется на
+  [GitHub Pages](https://menand.github.io/Qa.Guru.40.Diploma/), в Telegram уходит уведомление.
+
 ## Allure-отчёт
 
+Живой отчёт последнего CI-прогона: **https://menand.github.io/Qa.Guru.40.Diploma/**
+
 ```bash
-./gradlew allureServe   # собрать и открыть отчёт по результатам последнего прогона
+./gradlew allureServe   # собрать и открыть отчёт по результатам последнего локального прогона
 ```
 
 ### Главная страница
