@@ -159,7 +159,8 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 Второй, независимый CI — [workflow `tests`](https://github.com/menand/Qa.Guru.40.Diploma/actions/workflows/tests.yml):
 
 - **на каждый push в `main`** автоматически бежит `api_test`;
-- **вручную** (Run workflow) запускается любой слой: `api_test` / `web_test` / `mobile_test` / `test`;
+- **вручную** (Run workflow) запускается любой слой: `api_test` / `web_test` / `mobile_test` /
+  `test` (api+web) / `all` (все 37 тестов одним прогоном в общий отчёт);
 - web-тесты идут в headless Chrome самого раннера — Selenoid не нужен;
 - mobile-тесты ходят в BrowserStack (креды в GitHub Secrets);
 - после прогона Allure-отчёт с историей публикуется на
