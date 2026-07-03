@@ -1,0 +1,32 @@
+<div>POST to https://habitica.com/api/v3/user/auth/local/register</div>
+
+    <h4>Body</h4>
+    <div>
+    <pre class="preformated-text">
+{
+    &quot;username&quot;: &quot;qa_pjst2ugzbj&quot;,
+    &quot;email&quot;: &quot;qa_6jcxbwb3dk@mailinator.com&quot;,
+    &quot;password&quot;: &quot;5c4jjF9mD99GfXUM&quot;,
+    &quot;confirmPassword&quot;: &quot;5c4jjF9mD99GfXUM&quot;
+}    </pre>
+    </div>
+
+    <h4>Headers</h4>
+    <div>
+            <div>Accept: */*</div>
+            <div>x-client: habitica-diploma-tests</div>
+            <div>Content-Type: application/json</div>
+    </div>
+
+
+
+    <h4>Curl</h4>
+    <div>
+        curl -v -X POST &#39;https://habitica.com/api/v3/user/auth/local/register&#39; -H &#39;Accept: */*&#39; -H &#39;x-client: habitica-diploma-tests&#39; -H &#39;Content-Type: application/json&#39; -d &#39;{
+    &quot;username&quot;: &quot;qa_pjst2ugzbj&quot;,
+    &quot;email&quot;: &quot;qa_6jcxbwb3dk@mailinator.com&quot;,
+    &quot;password&quot;: &quot;5c4jjF9mD99GfXUM&quot;,
+    &quot;confirmPassword&quot;: &quot;5c4jjF9mD99GfXUM&quot;
+}&#39;
+    </div>
+
