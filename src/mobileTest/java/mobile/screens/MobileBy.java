@@ -17,4 +17,8 @@ final class MobileBy {
     static By id(String resourceId) {
         return AppiumBy.id(APP_PACKAGE + ":id/" + resourceId);
     }
+
+    static By exactText(String text) {
+        return AppiumBy.androidUIAutomator("new UiSelector().text(\"" + text + "\")");
+    }
 }

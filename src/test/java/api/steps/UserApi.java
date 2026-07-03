@@ -43,10 +43,16 @@ public final class UserApi {
                 .extract().jsonPath().getObject("data", UserProfile.class);
     }
 
-    @Step("API: отключить приветственный онбординг для пользователя")
+    @Step("API: отключить приветственный онбординг и туториал для пользователя")
     public static void markWelcomed(UserCredentials user) {
         given(ApiSpecs.quietAuthSpec(user))
-                .body(Map.of("flags.welcomed", true))
+                .body(Map.of(
+                        "flags.welcomed", true,
+                        // тур Джастина в приложении и вебе — оверлей перехватывает клики
+                        "flags.tutorial.common.habits", true,
+                        "flags.tutorial.common.dailies", true,
+                        "flags.tutorial.common.todos", true,
+                        "flags.tutorial.common.rewards", true))
                 .put("/user")
                 .then()
                 .spec(ApiSpecs.status(200));

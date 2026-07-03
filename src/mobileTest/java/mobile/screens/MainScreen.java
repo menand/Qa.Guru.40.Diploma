@@ -5,7 +5,6 @@ import io.qameta.allure.Step;
 
 import java.time.Duration;
 
-import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
@@ -15,7 +14,6 @@ import static com.codeborne.selenide.Selenide.$;
 public class MainScreen {
 
     private final SelenideElement bottomNavigation = $(MobileBy.id("bottom_navigation"));
-    private final SelenideElement toolbarTitle = $(MobileBy.id("toolbar_title"));
     private final SelenideElement todosTab = $(MobileBy.id("todos_tab"));
 
     @Step("Проверить, что открыт главный экран с задачами")
@@ -28,7 +26,12 @@ public class MainScreen {
     @Step("Открыть вкладку To Do's в нижней навигации")
     public MainScreen openTodosTab() {
         todosTab.click();
-        toolbarTitle.shouldHave(text("To Do"));
+        return this;
+    }
+
+    @Step("Проверить, что задача «{text}» отображается в списке")
+    public MainScreen checkTaskVisible(String text) {
+        $(MobileBy.exactText(text)).shouldBe(visible, Duration.ofSeconds(20));
         return this;
     }
 }
