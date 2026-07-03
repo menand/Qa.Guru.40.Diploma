@@ -16,8 +16,10 @@ public interface BrowserstackConfig extends Config {
     @Key("BROWSERSTACK_KEY")
     String key();
 
-    @Key("remoteUrl")
-    String remoteUrl();
+    /** Ключ намеренно не remoteUrl: CI передаёт -DremoteUrl со значением Selenoid для web-слоя. */
+    @Key("browserstackHub")
+    @DefaultValue("https://hub.browserstack.com/wd/hub")
+    String hubUrl();
 
     @Key("app")
     String app();

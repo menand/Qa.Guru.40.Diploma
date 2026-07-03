@@ -39,6 +39,9 @@ public abstract class MobileTestBase {
     static void configureAppium() {
         Configuration.browser = BrowserstackDriver.class.getName();
         Configuration.browserSize = null;
+        // CI передаёт -Dheadless=true всем слоям; для реального устройства флаг не только
+        // бессмыслен — Selenide падает, применяя его к кастомному WebDriverProvider
+        Configuration.headless = false;
         Configuration.timeout = 30_000;
         SelenideLogger.addListener("AllureSelenide",
                 new AllureSelenide().screenshots(true).savePageSource(false));

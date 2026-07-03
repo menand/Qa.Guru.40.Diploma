@@ -33,10 +33,10 @@ public class BrowserstackDriver implements WebDriverProvider {
                 "buildName", Configs.BROWSERSTACK.build()
         ));
         try {
-            return new AndroidDriver(URI.create(Configs.BROWSERSTACK.remoteUrl()).toURL(), caps);
+            return new AndroidDriver(URI.create(Configs.BROWSERSTACK.hubUrl()).toURL(), caps);
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Некорректный remoteUrl BrowserStack: "
-                    + Configs.BROWSERSTACK.remoteUrl(), e);
+            throw new IllegalArgumentException("Некорректный hub URL BrowserStack: "
+                    + Configs.BROWSERSTACK.hubUrl(), e);
         }
     }
 }
