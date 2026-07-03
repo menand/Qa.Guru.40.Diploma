@@ -30,9 +30,9 @@ public class AuthApiTests extends ApiTestBase {
 
         UserCredentials created = AuthApi.register(request);
 
-        step("Проверить, что вернулись валидные учётные данные", () -> {
-            assertThat(created.getId()).isNotBlank();
-            assertThat(created.getApiToken()).isNotBlank();
+        step("Проверить, что id и apiToken — валидные UUID", () -> {
+            assertThat(created.getId()).matches(UUID_REGEX);
+            assertThat(created.getApiToken()).matches(UUID_REGEX);
         });
         step("Очистка: удалить созданный аккаунт", () -> AuthApi.deleteUser(created));
     }
@@ -52,7 +52,7 @@ public class AuthApiTests extends ApiTestBase {
         step("Проверить ответ об ошибке", () -> {
             assertThat(error.getSuccess()).isFalse();
             assertThat(error.getError()).isEqualTo("NotAuthorized");
-            assertThat(error.getMessage()).isNotBlank();
+            assertThat(error.getMessage()).isEqualTo("Username already taken.");
         });
     }
 
@@ -65,7 +65,7 @@ public class AuthApiTests extends ApiTestBase {
 
         step("Проверить учётные данные в ответе", () -> {
             assertThat(loggedIn.getId()).isEqualTo(USER.getId());
-            assertThat(loggedIn.getApiToken()).isNotBlank();
+            assertThat(loggedIn.getApiToken()).isEqualTo(USER.getApiToken());
         });
     }
 
@@ -78,7 +78,9 @@ public class AuthApiTests extends ApiTestBase {
 
         step("Проверить ответ об ошибке", () -> {
             assertThat(error.getError()).isEqualTo("NotAuthorized");
-            assertThat(error.getMessage()).isNotBlank();
+            assertThat(error.getMessage()).isEqualTo(
+                    "Your email, username, or password are incorrect. "
+                            + "Please try again or use \"Forgot Password.\"");
         });
     }
 
@@ -91,7 +93,7 @@ public class AuthApiTests extends ApiTestBase {
 
         step("Проверить ответ об ошибке", () -> {
             assertThat(error.getError()).isEqualTo("NotAuthorized");
-            assertThat(error.getMessage()).containsIgnoringCase("authentication");
+            assertThat(error.getMessage()).isEqualTo("Missing authentication headers.");
         });
     }
 }

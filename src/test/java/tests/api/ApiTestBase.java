@@ -12,4 +12,8 @@ import org.junit.jupiter.api.Tag;
 public abstract class ApiTestBase {
 
     protected static final UserCredentials USER = TestUsers.shared();
+
+    /** Идентификаторы и токены Habitica — UUID v4. */
+    protected static final String UUID_REGEX =
+            "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 }

@@ -36,7 +36,8 @@ public class AuthWebTests extends WebTestBase {
         webdriver().shouldHave(urlContaining("/username"));
         registerPage.submitUsername(data.getUsername());
 
-        new TasksPage().waitLoaded();
+        new TasksPage().waitLoaded()
+                .checkCharacterName(data.getUsername());
 
         step("Очистка: удалить созданного пользователя через API", () ->
                 AuthApi.deleteUser(BrowserSession.currentUser(data.getUsername(), data.getPassword())));
@@ -63,7 +64,8 @@ public class AuthWebTests extends WebTestBase {
 
         new LoginPage().openPage()
                 .login(user.getUsername(), "wrong-password-123")
-                .checkErrorNotification("incorrect");
+                .checkErrorNotification("Your email, username, or password are incorrect. "
+                        + "Please try again or use \"Forgot Password.\"");
 
         webdriver().shouldHave(urlContaining("/login"));
     }

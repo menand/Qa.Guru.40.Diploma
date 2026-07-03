@@ -38,6 +38,15 @@ public final class TasksApi {
                 .extract().jsonPath().getList("data", HabiticaTask.class);
     }
 
+    @Step("API: получить задачу {taskId}")
+    public static HabiticaTask getTask(UserCredentials user, String taskId) {
+        return given(ApiSpecs.authSpec(user))
+                .get("/tasks/{taskId}", taskId)
+                .then()
+                .spec(ApiSpecs.status(200))
+                .extract().jsonPath().getObject("data", HabiticaTask.class);
+    }
+
     @Step("API: запросить задачу {taskId}, ожидая ошибку {expectedStatus}")
     public static ErrorResponse getTaskExpectingError(UserCredentials user, String taskId, int expectedStatus) {
         return given(ApiSpecs.authSpec(user))

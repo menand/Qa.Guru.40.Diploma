@@ -5,7 +5,9 @@ import api.models.HabiticaTask;
 import api.models.ScoreDirection;
 import api.models.ScoreResult;
 import api.models.TaskType;
+import api.models.UserProfile;
 import api.steps.TasksApi;
+import api.steps.UserApi;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
@@ -40,10 +42,15 @@ public class TasksApiTests extends ApiTestBase {
         HabiticaTask task = TasksApi.createTask(USER, text, TaskType.TODO);
 
         step("Проверить созданную задачу", () -> {
-            assertThat(task.getId()).isNotBlank();
+            assertThat(task.getId()).matches(UUID_REGEX);
             assertThat(task.getType()).isEqualTo(TaskType.TODO);
             assertThat(task.getText()).isEqualTo(text);
             assertThat(task.getCompleted()).isFalse();
+        });
+        step("Проверить дефолты новой задачи: пустые заметки, сложность easy, ценность 0", () -> {
+            assertThat(task.getNotes()).isEmpty();
+            assertThat(task.getPriority()).isEqualTo(1.0);
+            assertThat(task.getValue()).isEqualTo(0.0);
         });
     }
 
@@ -57,9 +64,14 @@ public class TasksApiTests extends ApiTestBase {
         HabiticaTask task = TasksApi.createTask(USER, text, TaskType.HABIT);
 
         step("Проверить созданную привычку", () -> {
-            assertThat(task.getId()).isNotBlank();
+            assertThat(task.getId()).matches(UUID_REGEX);
             assertThat(task.getType()).isEqualTo(TaskType.HABIT);
             assertThat(task.getText()).isEqualTo(text);
+        });
+        step("Проверить дефолты привычки: активны обе кнопки «+» и «−»", () -> {
+            assertThat(task.getUp()).isTrue();
+            assertThat(task.getDown()).isTrue();
+            assertThat(task.getValue()).isEqualTo(0.0);
         });
     }
 
@@ -72,10 +84,14 @@ public class TasksApiTests extends ApiTestBase {
 
         List<HabiticaTask> tasks = TasksApi.getUserTasks(USER);
 
-        step("Проверить, что задача есть в списке", () ->
+        step("Проверить, что задача в списке ровно одна и не искажена", () ->
                 assertThat(tasks)
-                        .extracting(HabiticaTask::getId)
-                        .contains(created.getId()));
+                        .filteredOn(task -> created.getId().equals(task.getId()))
+                        .singleElement()
+                        .satisfies(task -> {
+                            assertThat(task.getText()).isEqualTo(created.getText());
+                            assertThat(task.getType()).isEqualTo(TaskType.TODO);
+                        }));
     }
 
     @Test
@@ -88,25 +104,34 @@ public class TasksApiTests extends ApiTestBase {
 
         HabiticaTask updated = TasksApi.updateTaskText(USER, created.getId(), newText);
 
-        step("Проверить обновлённый текст", () -> {
+        step("Проверить обновлённый текст; id и тип не изменились", () -> {
             assertThat(updated.getId()).isEqualTo(created.getId());
             assertThat(updated.getText()).isEqualTo(newText);
+            assertThat(updated.getType()).isEqualTo(TaskType.TODO);
         });
     }
 
     @Test
     @Story("Выполнение задач")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Score todo вверх засчитывает выполнение и даёт награду (delta > 0)")
+    @DisplayName("Score todo вверх помечает задачу выполненной и начисляет опыт и золото")
     void scoreTodoUpGivesReward() {
+        UserProfile.Stats before = UserApi.getUser(USER).getStats();
         HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
 
         ScoreResult result = TasksApi.scoreTask(USER, created.getId(), ScoreDirection.UP);
 
-        step("Проверить награду за выполнение", () -> {
-            assertThat(result.getDelta()).isPositive();
-            assertThat(result.getGp()).isNotNull();
-            assertThat(result.getExp()).isNotNull();
+        step("Проверить награду: свежая todo даёт дельту ровно 1, +6 XP и +1 GP (крит может дать больше)", () -> {
+            assertThat(result.getDelta()).isEqualTo(1.0);
+            assertThat(result.getExp()).isGreaterThanOrEqualTo(before.getExp() + 6);
+            assertThat(result.getGp()).isGreaterThanOrEqualTo(before.getGp() + 1);
+            assertThat(result.getLvl()).isEqualTo(1);
+            assertThat(result.getHp()).isEqualTo(50.0);
+        });
+        step("Проверить, что задача помечена выполненной, а её ценность выросла до 1", () -> {
+            HabiticaTask scored = TasksApi.getTask(USER, created.getId());
+            assertThat(scored.getCompleted()).isTrue();
+            assertThat(scored.getValue()).isEqualTo(1.0);
         });
     }
 
@@ -120,7 +145,10 @@ public class TasksApiTests extends ApiTestBase {
         TasksApi.deleteTask(USER, created.getId());
         ErrorResponse error = TasksApi.getTaskExpectingError(USER, created.getId(), 404);
 
-        step("Проверить 404 по удалённой задаче", () ->
-                assertThat(error.getError()).isEqualTo("NotFound"));
+        step("Проверить 404 по удалённой задаче", () -> {
+            assertThat(error.getSuccess()).isFalse();
+            assertThat(error.getError()).isEqualTo("NotFound");
+            assertThat(error.getMessage()).isEqualTo("Task not found.");
+        });
     }
 }

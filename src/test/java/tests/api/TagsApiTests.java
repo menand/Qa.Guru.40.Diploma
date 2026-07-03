@@ -33,11 +33,12 @@ public class TagsApiTests extends ApiTestBase {
         List<TagModel> tags = TagsApi.getTags(USER);
 
         step("Проверить созданный тег и его наличие в списке", () -> {
-            assertThat(created.getId()).isNotBlank();
+            assertThat(created.getId()).matches(UUID_REGEX);
             assertThat(created.getName()).isEqualTo(name);
             assertThat(tags)
-                    .extracting(TagModel::getId)
-                    .contains(created.getId());
+                    .filteredOn(tag -> created.getId().equals(tag.getId()))
+                    .singleElement()
+                    .satisfies(tag -> assertThat(tag.getName()).isEqualTo(name));
         });
     }
 
@@ -50,8 +51,10 @@ public class TagsApiTests extends ApiTestBase {
         String newName = "renamed-" + FAKER.color().name();
 
         TagModel renamed = TagsApi.updateTag(USER, created.getId(), newName);
-        step("Проверить новое имя тега", () ->
-                assertThat(renamed.getName()).isEqualTo(newName));
+        step("Проверить новое имя тега; id не изменился", () -> {
+            assertThat(renamed.getId()).isEqualTo(created.getId());
+            assertThat(renamed.getName()).isEqualTo(newName);
+        });
 
         TagsApi.deleteTag(USER, created.getId());
         List<TagModel> tags = TagsApi.getTags(USER);

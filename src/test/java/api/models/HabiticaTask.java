@@ -12,4 +12,7 @@ public class HabiticaTask {
     private String notes;
     private Boolean completed;
     private Double priority;
+    private Double value;
+    private Boolean up;
+    private Boolean down;
 }

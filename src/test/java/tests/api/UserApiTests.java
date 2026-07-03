@@ -25,9 +25,14 @@ public class UserApiTests extends ApiTestBase {
         UserProfile profile = UserApi.getUser(USER);
 
         step("Проверить данные профиля", () -> {
+            assertThat(profile.getId()).isEqualTo(USER.getId());
             assertThat(profile.getAuth().getLocal().getUsername()).isEqualTo(USER.getUsername());
-            assertThat(profile.getStats().getLvl()).isGreaterThanOrEqualTo(1);
-            assertThat(profile.getStats().getHp()).isPositive();
+            assertThat(profile.getAuth().getLocal().getEmail())
+                    .isEqualTo(USER.getUsername() + "@mailinator.com");
+        });
+        step("Проверить стартовые статы свежего аккаунта", () -> {
+            assertThat(profile.getStats().getLvl()).isEqualTo(1);
+            assertThat(profile.getStats().getHp()).isEqualTo(50.0);
         });
     }
 
@@ -40,7 +45,9 @@ public class UserApiTests extends ApiTestBase {
 
         UserProfile updated = UserApi.updateDisplayName(USER, newName);
 
-        step("Проверить, что имя обновилось", () ->
-                assertThat(updated.getProfile().getName()).isEqualTo(newName));
+        step("Проверить, что имя обновилось, а логин не изменился", () -> {
+            assertThat(updated.getProfile().getName()).isEqualTo(newName);
+            assertThat(updated.getAuth().getLocal().getUsername()).isEqualTo(USER.getUsername());
+        });
     }
 }
