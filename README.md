@@ -71,9 +71,12 @@
 
 - ✅ интро показывается при первом запуске
 - ✅ Skip ведёт к выбору способа входа
-- ✅ кнопка Login открывает форму входа
+- ✅ кнопка входа открывает форму логина
 - ✅ логин с валидными кредами (пользователь создан через API) открывает главный экран с задачами
 - ✅ нижняя навигация переключает вкладки задач
+
+Тестируется официальный релиз Habitica 4.4 (apk из GitHub-релизов, загружен в BrowserStack
+под custom_id `habitica-android`).
 
 ## Особенности проекта
 
@@ -89,8 +92,9 @@
   shutdown hook'ом — не мусорим аккаунтами и экономим rate limit.
 - **Авторизация в web-тестах без UI**: креды кладутся в `localStorage` (`BrowserSession`), форма
   логина проверяется только в тестах логина.
-- **Compose-локаторы в mobile**: онбординг и логин приложения — Jetpack Compose без resource-id,
-  экраны локализуются по видимому тексту; после логина — классические View c id (`MobileBy`).
+- **Мобильный код — в отдельном source set** (`src/mobileTest/java`): selenide-appium глобально
+  подменяет плагины Selenide (page source, описание элементов) и через CDP-websocket ломает
+  web-прогоны в Selenoid, поэтому appium-зависимостей нет на classpath web/api-тестов.
 - **Ретраи** только для браузерных прогонов — инфраструктурные флейки живого стенда.
 
 ## Запуск тестов
@@ -171,19 +175,21 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 ## Структура проекта
 
 ```
-src/test/java
+src/test/java            — api + web (без appium-зависимостей)
 ├── api
 │   ├── models   — POJO-модели запросов/ответов (Lombok)
 │   ├── specs    — request/response-спецификации, Allure- и rate-limit-фильтры
 │   └── steps    — шаги API (AuthApi, UserApi, TasksApi, TagsApi)
 ├── web/pages    — Page Object'ы веба (HomePage, LoginPage, RegisterPage, TasksPage)
-├── mobile
-│   ├── drivers  — BrowserstackDriver (Appium / App Automate)
-│   └── screens  — Page Object'ы мобильного приложения (Intro, Login, Main)
 ├── config       — Owner-конфиги (api / web / browserstack)
 ├── helpers      — TestUsers, BrowserSession, Attachments
 └── tests
     ├── api      — 15 тестов
-    ├── web      — 17 тестов
-    └── mobile   — 5 смоук-тестов
+    └── web      — 17 тестов
+
+src/mobileTest/java      — отдельный source set с selenide-appium
+├── mobile
+│   ├── drivers  — BrowserstackDriver (Appium / App Automate)
+│   └── screens  — Page Object'ы мобильного приложения (Intro, Login, Main)
+└── tests/mobile — 5 смоук-тестов
 ```
