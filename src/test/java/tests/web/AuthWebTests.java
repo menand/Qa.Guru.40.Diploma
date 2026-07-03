@@ -3,6 +3,7 @@ package tests.web;
 import api.models.RegisterRequest;
 import api.models.UserCredentials;
 import api.steps.AuthApi;
+import api.steps.UserApi;
 import helpers.BrowserSession;
 import helpers.TestUsers;
 import io.qameta.allure.Feature;
@@ -46,13 +47,16 @@ public class AuthWebTests extends WebTestBase {
     @Test
     @Story("Логин")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Логин с валидными кредами открывает страницу задач с именем пользователя")
+    @DisplayName("Логин с валидными кредами открывает страницу задач с именем персонажа")
     void loginWithValidCredentialsOpensApp() {
         UserCredentials user = webUser();
+        // имя в шапке — display name профиля; берём актуальное через API,
+        // потому что API-тесты в объединённом прогоне могут его переименовать
+        String displayName = UserApi.getUser(user).getProfile().getName();
 
         new LoginPage().openPage().login(user.getUsername(), user.getPassword());
 
-        new TasksPage().waitLoaded().checkCharacterName(user.getUsername());
+        new TasksPage().waitLoaded().checkCharacterName(displayName);
     }
 
     @Test

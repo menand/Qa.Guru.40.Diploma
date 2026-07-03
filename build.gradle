@@ -82,6 +82,14 @@ tasks.withType(Test).configureEach {
     }
 }
 
+// объединённый прогон api+web (gradlew test) тоже идёт против живого стенда — ретраим флейки
+test {
+    retry {
+        maxRetries = 2
+        maxFailures = 10
+    }
+}
+
 ['api', 'web'].each { layer ->
     tasks.register("${layer}_test", Test) {
         group = 'verification'
