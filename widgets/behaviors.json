@@ -1,1 +1,1 @@
-{"total":1,"items":[{"uid":"f2bdfb33288beff1c1b3161610908dad","name":"Habitica REST API","statistic":{"failed":0,"broken":0,"skipped":0,"passed":4,"unknown":0,"total":4}}]}
+{"total":2,"items":[{"uid":"75e00be01ff9b432c00892e1d5cfeeaa","name":"Habitica Web UI","statistic":{"failed":1,"broken":0,"skipped":0,"passed":2,"unknown":0,"total":3}},{"uid":"f2bdfb33288beff1c1b3161610908dad","name":"Habitica REST API","statistic":{"failed":0,"broken":0,"skipped":0,"passed":4,"unknown":0,"total":4}}]}
