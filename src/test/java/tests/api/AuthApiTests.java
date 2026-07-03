@@ -3,20 +3,18 @@ package tests.api;
 import api.models.ErrorResponse;
 import api.models.RegisterRequest;
 import api.models.UserCredentials;
-import api.specs.ApiSpecs;
 import api.steps.AuthApi;
+import api.steps.UserApi;
 import helpers.TestUsers;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Feature("Аутентификация")
@@ -49,11 +47,9 @@ public class AuthApiTests extends ApiTestBase {
                 .username(USER.getUsername())
                 .build();
 
-        Response response = AuthApi.registerRaw(request);
+        ErrorResponse error = AuthApi.registerExpectingError(request, 401);
 
         step("Проверить ответ об ошибке", () -> {
-            assertThat(response.statusCode()).isEqualTo(401);
-            ErrorResponse error = response.as(ErrorResponse.class);
             assertThat(error.getSuccess()).isFalse();
             assertThat(error.getError()).isEqualTo("NotAuthorized");
             assertThat(error.getMessage()).isNotBlank();
@@ -65,12 +61,11 @@ public class AuthApiTests extends ApiTestBase {
     @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Логин с валидными кредами возвращает id и apiToken пользователя")
     void successfulLoginReturnsToken() {
-        Response response = AuthApi.login(USER.getUsername(), USER.getPassword());
+        UserCredentials loggedIn = AuthApi.login(USER.getUsername(), USER.getPassword());
 
         step("Проверить учётные данные в ответе", () -> {
-            assertThat(response.statusCode()).isEqualTo(200);
-            assertThat(response.<String>path("data.id")).isEqualTo(USER.getId());
-            assertThat(response.<String>path("data.apiToken")).isNotBlank();
+            assertThat(loggedIn.getId()).isEqualTo(USER.getId());
+            assertThat(loggedIn.getApiToken()).isNotBlank();
         });
     }
 
@@ -79,11 +74,9 @@ public class AuthApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("Логин с неверным паролем отклоняется с 401 NotAuthorized")
     void loginWithWrongPasswordFails() {
-        Response response = AuthApi.login(USER.getUsername(), "wrong-password-123");
+        ErrorResponse error = AuthApi.loginExpectingError(USER.getUsername(), "wrong-password-123", 401);
 
         step("Проверить ответ об ошибке", () -> {
-            assertThat(response.statusCode()).isEqualTo(401);
-            ErrorResponse error = response.as(ErrorResponse.class);
             assertThat(error.getError()).isEqualTo("NotAuthorized");
             assertThat(error.getMessage()).isNotBlank();
         });
@@ -94,12 +87,9 @@ public class AuthApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("Запрос профиля без auth-заголовков отклоняется с 401")
     void requestWithoutAuthHeadersFails() {
-        Response response = step("Запросить GET /user без x-api-user и x-api-key",
-                () -> given(ApiSpecs.anonSpec()).get("/user"));
+        ErrorResponse error = UserApi.getUserWithoutAuth(401);
 
         step("Проверить ответ об ошибке", () -> {
-            assertThat(response.statusCode()).isEqualTo(401);
-            ErrorResponse error = response.as(ErrorResponse.class);
             assertThat(error.getError()).isEqualTo("NotAuthorized");
             assertThat(error.getMessage()).containsIgnoringCase("authentication");
         });

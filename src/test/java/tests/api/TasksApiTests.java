@@ -2,14 +2,15 @@ package tests.api;
 
 import api.models.ErrorResponse;
 import api.models.HabiticaTask;
+import api.models.ScoreDirection;
 import api.models.ScoreResult;
+import api.models.TaskType;
 import api.steps.TasksApi;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import io.restassured.response.Response;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,11 +37,11 @@ public class TasksApiTests extends ApiTestBase {
     void createTodoReturnsTask() {
         String text = randomTaskText();
 
-        HabiticaTask task = TasksApi.createTask(USER, text, "todo");
+        HabiticaTask task = TasksApi.createTask(USER, text, TaskType.TODO);
 
         step("Проверить созданную задачу", () -> {
             assertThat(task.getId()).isNotBlank();
-            assertThat(task.getType()).isEqualTo("todo");
+            assertThat(task.getType()).isEqualTo(TaskType.TODO);
             assertThat(task.getText()).isEqualTo(text);
             assertThat(task.getCompleted()).isFalse();
         });
@@ -53,11 +54,11 @@ public class TasksApiTests extends ApiTestBase {
     void createHabitReturnsTask() {
         String text = randomTaskText();
 
-        HabiticaTask task = TasksApi.createTask(USER, text, "habit");
+        HabiticaTask task = TasksApi.createTask(USER, text, TaskType.HABIT);
 
         step("Проверить созданную привычку", () -> {
             assertThat(task.getId()).isNotBlank();
-            assertThat(task.getType()).isEqualTo("habit");
+            assertThat(task.getType()).isEqualTo(TaskType.HABIT);
             assertThat(task.getText()).isEqualTo(text);
         });
     }
@@ -67,7 +68,7 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("GET /tasks/user содержит созданную задачу")
     void taskListContainsCreatedTask() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), "todo");
+        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
 
         List<HabiticaTask> tasks = TasksApi.getUserTasks(USER);
 
@@ -82,7 +83,7 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("PUT /tasks/:id меняет текст задачи")
     void updateTaskChangesText() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), "todo");
+        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
         String newText = randomTaskText();
 
         HabiticaTask updated = TasksApi.updateTaskText(USER, created.getId(), newText);
@@ -98,9 +99,9 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Score todo вверх засчитывает выполнение и даёт награду (delta > 0)")
     void scoreTodoUpGivesReward() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), "todo");
+        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
 
-        ScoreResult result = TasksApi.scoreTask(USER, created.getId(), "up");
+        ScoreResult result = TasksApi.scoreTask(USER, created.getId(), ScoreDirection.UP);
 
         step("Проверить награду за выполнение", () -> {
             assertThat(result.getDelta()).isPositive();
@@ -114,15 +115,12 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("Удалённая задача недоступна: повторный GET возвращает 404 NotFound")
     void deletedTaskIsNotFound() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), "todo");
+        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
 
         TasksApi.deleteTask(USER, created.getId());
-        Response getDeleted = TasksApi.getTaskRaw(USER, created.getId());
+        ErrorResponse error = TasksApi.getTaskExpectingError(USER, created.getId(), 404);
 
-        step("Проверить 404 по удалённой задаче", () -> {
-            assertThat(getDeleted.statusCode()).isEqualTo(404);
-            ErrorResponse error = getDeleted.as(ErrorResponse.class);
-            assertThat(error.getError()).isEqualTo("NotFound");
-        });
+        step("Проверить 404 по удалённой задаче", () ->
+                assertThat(error.getError()).isEqualTo("NotFound"));
     }
 }

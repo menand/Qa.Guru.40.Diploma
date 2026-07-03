@@ -1,11 +1,13 @@
 package api.steps;
 
+import api.models.ErrorResponse;
 import api.models.HabiticaTask;
+import api.models.ScoreDirection;
 import api.models.ScoreResult;
+import api.models.TaskType;
 import api.models.UserCredentials;
 import api.specs.ApiSpecs;
 import io.qameta.allure.Step;
-import io.restassured.response.Response;
 
 import java.util.List;
 import java.util.Map;
@@ -18,12 +20,12 @@ public final class TasksApi {
     }
 
     @Step("API: создать задачу типа {type} с текстом «{text}»")
-    public static HabiticaTask createTask(UserCredentials user, String text, String type) {
+    public static HabiticaTask createTask(UserCredentials user, String text, TaskType type) {
         return given(ApiSpecs.authSpec(user))
-                .body(Map.of("text", text, "type", type))
+                .body(Map.of("text", text, "type", type.key()))
                 .post("/tasks/user")
                 .then()
-                .statusCode(201)
+                .spec(ApiSpecs.status(201))
                 .extract().jsonPath().getObject("data", HabiticaTask.class);
     }
 
@@ -32,14 +34,17 @@ public final class TasksApi {
         return given(ApiSpecs.authSpec(user))
                 .get("/tasks/user")
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.status(200))
                 .extract().jsonPath().getList("data", HabiticaTask.class);
     }
 
-    @Step("API: получить задачу {taskId}")
-    public static Response getTaskRaw(UserCredentials user, String taskId) {
+    @Step("API: запросить задачу {taskId}, ожидая ошибку {expectedStatus}")
+    public static ErrorResponse getTaskExpectingError(UserCredentials user, String taskId, int expectedStatus) {
         return given(ApiSpecs.authSpec(user))
-                .get("/tasks/{taskId}", taskId);
+                .get("/tasks/{taskId}", taskId)
+                .then()
+                .spec(ApiSpecs.status(expectedStatus))
+                .extract().as(ErrorResponse.class);
     }
 
     @Step("API: изменить текст задачи {taskId} на «{text}»")
@@ -48,16 +53,16 @@ public final class TasksApi {
                 .body(Map.of("text", text))
                 .put("/tasks/{taskId}", taskId)
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.status(200))
                 .extract().jsonPath().getObject("data", HabiticaTask.class);
     }
 
     @Step("API: засчитать задачу {taskId} в направлении {direction}")
-    public static ScoreResult scoreTask(UserCredentials user, String taskId, String direction) {
+    public static ScoreResult scoreTask(UserCredentials user, String taskId, ScoreDirection direction) {
         return given(ApiSpecs.authSpec(user))
-                .post("/tasks/{taskId}/score/{direction}", taskId, direction)
+                .post("/tasks/{taskId}/score/{direction}", taskId, direction.key())
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.status(200))
                 .extract().jsonPath().getObject("data", ScoreResult.class);
     }
 
@@ -66,6 +71,6 @@ public final class TasksApi {
         given(ApiSpecs.authSpec(user))
                 .delete("/tasks/{taskId}", taskId)
                 .then()
-                .statusCode(200);
+                .spec(ApiSpecs.status(200));
     }
 }

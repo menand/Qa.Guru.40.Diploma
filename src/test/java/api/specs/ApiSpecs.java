@@ -4,9 +4,11 @@ import api.models.UserCredentials;
 import config.Configs;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 
 public final class ApiSpecs {
 
@@ -29,11 +31,18 @@ public final class ApiSpecs {
                 .build();
     }
 
-    /** Спека без Allure-вложений — для сервисных вызовов вне жизненного цикла тестов (shutdown hook). */
+    /** Спека без Allure-вложений — для сервисных вызовов (подготовка данных, shutdown hook). */
     public static RequestSpecification quietAuthSpec(UserCredentials user) {
         return baseBuilder()
                 .addHeader("x-api-user", user.getId())
                 .addHeader("x-api-key", user.getApiToken())
+                .build();
+    }
+
+    /** Спека ответа: проверка статус-кода живёт в шагах, а не в тестах. */
+    public static ResponseSpecification status(int expectedStatus) {
+        return new ResponseSpecBuilder()
+                .expectStatusCode(expectedStatus)
                 .build();
     }
 

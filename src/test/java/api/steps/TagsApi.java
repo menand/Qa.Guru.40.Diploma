@@ -21,7 +21,7 @@ public final class TagsApi {
                 .body(Map.of("name", name))
                 .post("/tags")
                 .then()
-                .statusCode(201)
+                .spec(ApiSpecs.status(201))
                 .extract().jsonPath().getObject("data", TagModel.class);
     }
 
@@ -30,7 +30,7 @@ public final class TagsApi {
         return given(ApiSpecs.authSpec(user))
                 .get("/tags")
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.status(200))
                 .extract().jsonPath().getList("data", TagModel.class);
     }
 
@@ -40,7 +40,7 @@ public final class TagsApi {
                 .body(Map.of("name", name))
                 .put("/tags/{tagId}", tagId)
                 .then()
-                .statusCode(200)
+                .spec(ApiSpecs.status(200))
                 .extract().jsonPath().getObject("data", TagModel.class);
     }
 
@@ -49,6 +49,6 @@ public final class TagsApi {
         given(ApiSpecs.authSpec(user))
                 .delete("/tags/{tagId}", tagId)
                 .then()
-                .statusCode(200);
+                .spec(ApiSpecs.status(200));
     }
 }

@@ -8,7 +8,7 @@ import lombok.Data;
 public class HabiticaTask {
     private String id;
     private String text;
-    private String type;
+    private TaskType type;
     private String notes;
     private Boolean completed;
     private Double priority;

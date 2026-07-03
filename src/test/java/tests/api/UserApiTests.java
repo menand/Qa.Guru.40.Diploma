@@ -1,12 +1,12 @@
 package tests.api;
 
+import api.models.UserProfile;
 import api.steps.UserApi;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,13 +22,12 @@ public class UserApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("GET /user возвращает профиль с корректным username и стартовыми статами")
     void getUserReturnsProfile() {
-        Response response = UserApi.getUser(USER);
+        UserProfile profile = UserApi.getUser(USER);
 
         step("Проверить данные профиля", () -> {
-            assertThat(response.statusCode()).isEqualTo(200);
-            assertThat(response.<String>path("data.auth.local.username")).isEqualTo(USER.getUsername());
-            assertThat(response.jsonPath().getInt("data.stats.lvl")).isGreaterThanOrEqualTo(1);
-            assertThat(response.jsonPath().getDouble("data.stats.hp")).isPositive();
+            assertThat(profile.getAuth().getLocal().getUsername()).isEqualTo(USER.getUsername());
+            assertThat(profile.getStats().getLvl()).isGreaterThanOrEqualTo(1);
+            assertThat(profile.getStats().getHp()).isPositive();
         });
     }
 
@@ -39,11 +38,9 @@ public class UserApiTests extends ApiTestBase {
     void updateDisplayNameChangesProfileName() {
         String newName = "Дипломант " + USER.getUsername().substring(3, 9);
 
-        Response response = UserApi.updateDisplayName(USER, newName);
+        UserProfile updated = UserApi.updateDisplayName(USER, newName);
 
-        step("Проверить, что имя обновилось", () -> {
-            assertThat(response.statusCode()).isEqualTo(200);
-            assertThat(response.<String>path("data.profile.name")).isEqualTo(newName);
-        });
+        step("Проверить, что имя обновилось", () ->
+                assertThat(updated.getProfile().getName()).isEqualTo(newName));
     }
 }
