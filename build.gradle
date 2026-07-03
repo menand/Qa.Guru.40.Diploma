@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'io.qameta.allure' version '2.12.0'
+}
+
+group = 'guru.qa.habitica'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+def allureVersion = '2.29.1',
+    selenideVersion = '7.7.3',
+    restAssuredVersion = '5.5.0',
+    junitVersion = '5.11.4',
+    appiumVersion = '9.3.0'
+
+allure {
+    report {
+        version.set(allureVersion)
+    }
+    adapter {
+        aspectjWeaver.set(true)
+        frameworks {
+            junit5 {
+                adapterVersion.set(allureVersion)
+            }
+        }
+    }
+}
+
+dependencies {
+    testImplementation platform("org.junit:junit-bom:${junitVersion}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+
+    testImplementation "com.codeborne:selenide:${selenideVersion}"
+    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    testImplementation "io.appium:java-client:${appiumVersion}"
+
+    testImplementation "io.qameta.allure:allure-selenide:${allureVersion}"
+    testImplementation "io.qameta.allure:allure-rest-assured:${allureVersion}"
+
+    testImplementation 'org.aeonbits.owner:owner:1.0.12'
+    testImplementation 'net.datafaker:datafaker:2.4.2'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    testImplementation 'org.assertj:assertj-core:3.26.3'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.16'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.36'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    systemProperties(System.getProperties())
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat 'short'
+    }
+}
+
+['api', 'web', 'mobile'].each { layer ->
+    tasks.register("${layer}_test", Test) {
+        group = 'verification'
+        description = "Runs ${layer} tests"
+        useJUnitPlatform {
+            includeTags layer
+        }
+    }
+}

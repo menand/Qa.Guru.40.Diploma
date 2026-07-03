@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Падения проверок (assert)",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Дефекты тестов (ошибки выполнения)",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "Rate limit Habitica",
+    "matchedStatuses": ["broken", "failed"],
+    "messageRegex": ".*(429|Too Many Requests|RateLimit).*"
+  },
+  {
+    "name": "Проигнорированные тесты",
+    "matchedStatuses": ["skipped"]
+  }
+]
