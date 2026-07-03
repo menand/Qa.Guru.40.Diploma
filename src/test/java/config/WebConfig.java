@@ -18,9 +18,6 @@ public interface WebConfig extends Config {
     @Key("browserSize")
     String browserSize();
 
-    @Key("mobileDeviceName")
-    String mobileDeviceName();
-
     @Key("timeout")
     long timeout();
 

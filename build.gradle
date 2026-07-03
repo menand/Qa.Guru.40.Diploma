@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'io.qameta.allure' version '2.12.0'
+    id 'org.gradle.test-retry' version '1.6.0'
 }
 
 group = 'guru.qa.habitica'
@@ -35,6 +36,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
     testImplementation "com.codeborne:selenide:${selenideVersion}"
+    testImplementation "com.codeborne:selenide-appium:${selenideVersion}"
     testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
     testImplementation "io.appium:java-client:${appiumVersion}"
 
@@ -64,12 +66,26 @@ tasks.withType(Test).configureEach {
     }
 }
 
+// мобильным тестам нужны BrowserStack-креды — по умолчанию (gradlew test/build) их не гоняем
+test {
+    useJUnitPlatform {
+        excludeTags 'mobile'
+    }
+}
+
 ['api', 'web', 'mobile'].each { layer ->
     tasks.register("${layer}_test", Test) {
         group = 'verification'
         description = "Runs ${layer} tests"
         useJUnitPlatform {
             includeTags layer
+        }
+        if (layer != 'api') {
+            // браузерные прогоны против живого стенда: ретраим инфраструктурные флейки
+            retry {
+                maxRetries = 2
+                maxFailures = 10
+            }
         }
     }
 }
