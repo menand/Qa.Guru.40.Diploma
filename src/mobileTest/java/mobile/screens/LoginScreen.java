@@ -1,55 +1,53 @@
 package mobile.screens;
 
-import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
-import io.appium.java_client.AppiumBy;
 import io.qameta.allure.Step;
 
-import static com.codeborne.selenide.CollectionCondition.sizeGreaterThanOrEqual;
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
 
 /**
- * Экран входа (Compose): сначала выбор способа входа,
- * по кнопке Login раскрывается форма username/password.
+ * Стартовый экран авторизации: «начать новую игру» / «показать форму логина»,
+ * по show_login_button раскрывается форма username/password.
  */
 public class LoginScreen {
 
-    private final SelenideElement continueWithEmailButton = $(MobileBy.exactText("Continue with email"));
-    // текст «Login» встречается на экране только один раз: на выборе способа входа это
-    // кнопка-переключатель, в открытой форме — кнопка отправки
-    private final SelenideElement openLoginFormButton = $(MobileBy.exactText("Login"));
-    private final SelenideElement submitButton = $(MobileBy.exactText("Login"));
-    private final SelenideElement forgotPasswordButton = $(MobileBy.exactText("Forgot Password"));
-    // Compose-поля без id: username — первый EditText, password — второй
-    private final ElementsCollection inputFields = $$(AppiumBy.className("android.widget.EditText"));
+    private final SelenideElement newGameButton = $(MobileBy.id("new_game_button"));
+    private final SelenideElement showLoginButton = $(MobileBy.id("show_login_button"));
+    private final SelenideElement usernameInput = $(MobileBy.id("username"));
+    private final SelenideElement passwordInput = $(MobileBy.id("password"));
+    private final SelenideElement loginButton = $(MobileBy.id("login_btn"));
+    private final SelenideElement forgotPasswordButton = $(MobileBy.id("forgot_password"));
 
     @Step("Проверить, что показан выбор способа входа")
     public LoginScreen checkAuthOptionsVisible() {
-        continueWithEmailButton.shouldBe(visible);
-        openLoginFormButton.shouldBe(visible);
+        newGameButton.shouldBe(visible, Duration.ofSeconds(20));
+        showLoginButton.shouldBe(visible);
         return this;
     }
 
     @Step("Открыть форму логина")
     public LoginScreen openLoginForm() {
-        openLoginFormButton.click();
+        showLoginButton.shouldBe(visible, Duration.ofSeconds(20)).click();
         return this;
     }
 
     @Step("Проверить, что форма логина отображается")
     public LoginScreen checkLoginFormVisible() {
-        inputFields.shouldHave(sizeGreaterThanOrEqual(2));
+        usernameInput.shouldBe(visible);
+        passwordInput.shouldBe(visible);
+        loginButton.shouldBe(visible);
         forgotPasswordButton.shouldBe(visible);
         return this;
     }
 
     @Step("Войти под пользователем {username}")
     public MainScreen login(String username, String password) {
-        inputFields.get(0).setValue(username);
-        inputFields.get(1).setValue(password);
-        submitButton.click();
+        usernameInput.setValue(username);
+        passwordInput.setValue(password);
+        loginButton.click();
         return new MainScreen();
     }
 }

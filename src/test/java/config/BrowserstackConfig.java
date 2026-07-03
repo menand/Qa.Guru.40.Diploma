@@ -28,6 +28,10 @@ public interface BrowserstackConfig extends Config {
     @Key("osVersion")
     String osVersion();
 
+    @Key("appiumVersion")
+    @DefaultValue("2.6.0")
+    String appiumVersion();
+
     @Key("project")
     String project();
 

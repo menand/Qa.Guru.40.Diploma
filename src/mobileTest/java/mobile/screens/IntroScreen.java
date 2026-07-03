@@ -9,18 +9,16 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 /**
- * Интро-онбординг при первом запуске приложения (3 слайда, Compose).
+ * Интро при первом запуске приложения: слайды и кнопка Skip.
  */
 public class IntroScreen {
 
-    private final SelenideElement skipButton = $(MobileBy.exactText("Skip"));
-    private final SelenideElement nextButton = $(MobileBy.exactText("Next"));
+    private final SelenideElement skipButton = $(MobileBy.id("skipButton"));
 
     @Step("Проверить, что интро отображается")
     public IntroScreen checkOpened() {
         // холодный старт приложения на ферме устройств бывает долгим
         skipButton.shouldBe(visible, Duration.ofSeconds(60));
-        nextButton.shouldBe(visible);
         return this;
     }
 

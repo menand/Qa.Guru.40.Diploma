@@ -10,13 +10,11 @@ import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 
 /**
- * Главный экран приложения после логина: тулбар, список задач
- * и нижняя навигация по типам задач (классические View с resource-id).
+ * Главный экран приложения после логина: тулбар и нижняя навигация по типам задач.
  */
 public class MainScreen {
 
     private final SelenideElement bottomNavigation = $(MobileBy.id("bottom_navigation"));
-    private final SelenideElement taskList = $(MobileBy.id("recyclerView"));
     private final SelenideElement toolbarTitle = $(MobileBy.id("toolbar_title"));
     private final SelenideElement todosTab = $(MobileBy.id("todos_tab"));
 
@@ -24,7 +22,6 @@ public class MainScreen {
     public MainScreen checkOpened() {
         // после логина приложение синхронизирует данные — даём запас
         bottomNavigation.shouldBe(visible, Duration.ofSeconds(60));
-        taskList.shouldBe(visible);
         return this;
     }
 

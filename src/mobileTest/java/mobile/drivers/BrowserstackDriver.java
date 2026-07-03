@@ -28,6 +28,7 @@ public class BrowserstackDriver implements WebDriverProvider {
         caps.setCapability("bstack:options", Map.of(
                 "userName", Configs.BROWSERSTACK.user(),
                 "accessKey", Configs.BROWSERSTACK.key(),
+                "appiumVersion", Configs.BROWSERSTACK.appiumVersion(),
                 "projectName", Configs.BROWSERSTACK.project(),
                 "buildName", Configs.BROWSERSTACK.build()
         ));
