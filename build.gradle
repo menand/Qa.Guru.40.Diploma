@@ -63,13 +63,13 @@ dependencies {
     testImplementation 'net.datafaker:datafaker:2.4.2'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
     testImplementation 'org.assertj:assertj-core:3.26.3'
-    testImplementation 'org.slf4j:slf4j-simple:2.0.16'
+    testRuntimeOnly 'org.slf4j:slf4j-simple:2.0.16'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.36'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.36'
 }
 
-compileTestJava {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -79,6 +79,13 @@ tasks.withType(Test).configureEach {
     testLogging {
         events 'passed', 'skipped', 'failed'
         exceptionFormat 'short'
+    }
+    // кастомные категории Allure (categories.json) должны лежать рядом с результатами
+    doFirst {
+        copy {
+            from 'src/test/resources/categories.json'
+            into 'build/allure-results'
+        }
     }
 }
 

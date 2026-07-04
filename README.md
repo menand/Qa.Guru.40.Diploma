@@ -108,7 +108,8 @@
 - **Мобильный код — в отдельном source set** (`src/mobileTest/java`): selenide-appium глобально
   подменяет плагины Selenide (page source, описание элементов) и через CDP-websocket ломает
   web-прогоны в Selenoid, поэтому appium-зависимостей нет на classpath web/api-тестов.
-- **Ретраи** только для браузерных прогонов — инфраструктурные флейки живого стенда.
+- **Ретраи** (gradle test-retry) — у прогонов с браузером/устройством и объединённого `test`;
+  чистый `api_test` бежит без ретраев.
 
 ## Запуск тестов
 
@@ -130,6 +131,7 @@
 | `browserVersion` | *(пусто)*              | версия браузера для Selenoid; пусто — любая       |
 | `browserSize`    | `1920x1080`            | размер окна                                       |
 | `headless`       | `false`                | headless-режим                                    |
+| `timeout`        | `10000`                | таймаут ожиданий Selenide, мс                     |
 | `remoteUrl`      | *(пусто)*              | Selenoid/Grid; пусто — локальный браузер          |
 | `videoEnabled`   | `true`                 | запись видео в Selenoid (только с `remoteUrl`)    |
 
@@ -143,6 +145,7 @@
 | `phone`             | `pixel`                               | профиль устройства (см. ниже)       |
 | `appiumVersion`     | `2.6.0`                               | версия Appium на BrowserStack       |
 | `browserstackHub`   | `https://hub.browserstack.com/wd/hub` | hub App Automate                    |
+| `project` / `build` | `Habitica diploma tests` / `habitica-mobile` | имена проекта и сборки в BrowserStack |
 
 Профили устройств (`-Dphone=...`, набор расширяется в `browserstack.properties`):
 
@@ -195,7 +198,7 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 
 Второй, независимый CI — [workflow `tests`](https://github.com/menand/Qa.Guru.40.Diploma/actions/workflows/tests.yml):
 
-- **на каждый push в `main`** автоматически бежит `api_test`;
+- **на каждый push в `main`** автоматически бежит `api_test` (правки только README/картинок не триггерят);
 - **вручную** (Run workflow) запускается любой слой: `api_test` / `web_test` / `mobile_test` /
   `test` (api+web) / `all` (все 37 тестов одним прогоном в общий отчёт);
 - web-тесты идут в headless Chrome самого раннера — Selenoid не нужен;

@@ -22,7 +22,7 @@ public class RateLimitFilter implements Filter {
         Response response = ctx.next(requestSpec, responseSpec);
         String remaining = response.getHeader("X-RateLimit-Remaining");
         if (remaining != null && Double.parseDouble(remaining) <= 1) {
-            // ponytail: ждём окно целиком; точный парсинг X-RateLimit-Reset — если прогон станет медленным
+            // ждём окно целиком; точный парсинг X-RateLimit-Reset — если прогон станет медленным
             sleep(31_000);
         }
         return response;

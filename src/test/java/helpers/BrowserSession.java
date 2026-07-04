@@ -28,6 +28,12 @@ public final class BrowserSession {
         open("/");
     }
 
+    /** Появились ли креды сессии в localStorage (т.е. регистрация/логин прошли). */
+    public static boolean hasSession() {
+        Object settings = executeJavaScript("return localStorage.getItem(arguments[0])", SETTINGS_KEY);
+        return settings != null;
+    }
+
     @Step("Прочитать учётные данные текущей web-сессии из localStorage")
     public static UserCredentials currentUser(String username, String password) {
         String apiId = executeJavaScript(

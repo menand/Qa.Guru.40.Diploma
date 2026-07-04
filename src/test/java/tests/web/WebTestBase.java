@@ -1,7 +1,6 @@
 package tests.web;
 
 import api.models.UserCredentials;
-import api.steps.UserApi;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.WebDriverRunner;
@@ -29,7 +28,6 @@ import java.util.Map;
 @Epic("Habitica Web UI")
 public abstract class WebTestBase {
 
-    private static UserCredentials webUser;
 
     @BeforeAll
     static void configureSelenide() {
@@ -77,12 +75,8 @@ public abstract class WebTestBase {
     }
 
     /** Общий пользователь для авторизованных web-тестов (без приветственного онбординга). */
-    protected static synchronized UserCredentials webUser() {
-        if (webUser == null) {
-            webUser = TestUsers.shared();
-            UserApi.markWelcomed(webUser);
-        }
-        return webUser;
+    protected static UserCredentials webUser() {
+        return TestUsers.sharedWelcomed();
     }
 
     @Step("Открыть приложение под пользователем (авторизация через localStorage)")

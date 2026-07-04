@@ -2,6 +2,7 @@ package tests.api;
 
 import api.models.UserProfile;
 import api.steps.UserApi;
+import helpers.TestUsers;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
@@ -28,7 +29,7 @@ public class UserApiTests extends ApiTestBase {
             assertThat(profile.getId()).isEqualTo(USER.getId());
             assertThat(profile.getAuth().getLocal().getUsername()).isEqualTo(USER.getUsername());
             assertThat(profile.getAuth().getLocal().getEmail())
-                    .isEqualTo(USER.getUsername() + "@mailinator.com");
+                    .isEqualTo(USER.getUsername() + TestUsers.EMAIL_DOMAIN);
         });
         step("Проверить стартовые статы свежего аккаунта", () -> {
             assertThat(profile.getStats().getLvl()).isEqualTo(1);

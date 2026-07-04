@@ -7,4 +7,3 @@ out/
 allure-results/
 allure-report/
 src/test/resources/config/credentials.properties
-.playwright-mcp/

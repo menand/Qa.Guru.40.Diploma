@@ -30,11 +30,14 @@ public class AuthApiTests extends ApiTestBase {
 
         UserCredentials created = AuthApi.register(request);
 
-        step("Проверить, что id и apiToken — валидные UUID", () -> {
-            assertThat(created.getId()).matches(UUID_REGEX);
-            assertThat(created.getApiToken()).matches(UUID_REGEX);
-        });
-        step("Очистка: удалить созданный аккаунт", () -> AuthApi.deleteUser(created));
+        try {
+            step("Проверить, что id и apiToken — валидные UUID", () -> {
+                assertThat(created.getId()).matches(UUID_REGEX);
+                assertThat(created.getApiToken()).matches(UUID_REGEX);
+            });
+        } finally {
+            step("Очистка: удалить созданный аккаунт", () -> AuthApi.deleteUser(created));
+        }
     }
 
     @Test

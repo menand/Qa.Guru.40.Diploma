@@ -3,12 +3,16 @@ package helpers;
 import api.models.RegisterRequest;
 import api.models.UserCredentials;
 import api.steps.AuthApi;
+import api.steps.UserApi;
 import net.datafaker.Faker;
 
 public final class TestUsers {
 
+    public static final String EMAIL_DOMAIN = "@mailinator.com";
+
     private static final Faker FAKER = new Faker();
     private static UserCredentials shared;
+    private static boolean welcomed;
 
     private TestUsers() {
     }
@@ -26,6 +30,16 @@ public final class TestUsers {
         return shared;
     }
 
+    /** Общий пользователь без приветственного онбординга — для браузерных и мобильных тестов. */
+    public static synchronized UserCredentials sharedWelcomed() {
+        UserCredentials user = shared();
+        if (!welcomed) {
+            UserApi.markWelcomed(user);
+            welcomed = true;
+        }
+        return user;
+    }
+
     /**
      * Регистрация — первый запрос прогона: окно rate limit мог исчерпать
      * предыдущий запуск с этого же IP. Один повтор после полного окна.
@@ -34,12 +48,20 @@ public final class TestUsers {
         try {
             return AuthApi.register(randomRegisterRequest());
         } catch (AssertionError firstAttempt) {
+            if (!String.valueOf(firstAttempt.getMessage()).contains("429")) {
+                throw firstAttempt;
+            }
             try {
                 Thread.sleep(61_000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            return AuthApi.register(randomRegisterRequest());
+            try {
+                return AuthApi.register(randomRegisterRequest());
+            } catch (AssertionError secondAttempt) {
+                secondAttempt.addSuppressed(firstAttempt);
+                throw secondAttempt;
+            }
         }
     }
 
@@ -48,7 +70,7 @@ public final class TestUsers {
         String password = FAKER.internet().password(10, 16, true, false, true);
         return RegisterRequest.builder()
                 .username(username)
-                .email(username + "@mailinator.com")
+                .email(username + EMAIL_DOMAIN)
                 .password(password)
                 .confirmPassword(password)
                 .build();

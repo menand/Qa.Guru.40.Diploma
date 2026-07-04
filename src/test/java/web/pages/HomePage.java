@@ -39,11 +39,10 @@ public class HomePage {
 
     @Step("Принять cookies, если показан баннер")
     public static void acceptCookiesIfShown() {
-        // баннер рендерится Vue с задержкой — ждём его немного и молча идём дальше, если не появился
+        // баннер рендерится Vue с задержкой — ждём его немного и идём дальше, если не появился
         SelenideElement accept = $$("button").findBy(text("Accept All Cookies"));
-        try {
-            accept.shouldBe(visible, Duration.ofSeconds(4)).click();
-        } catch (Throwable ignored) {
+        if (accept.is(visible, Duration.ofSeconds(4))) {
+            accept.click();
         }
     }
 

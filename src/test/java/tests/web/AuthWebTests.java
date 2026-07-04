@@ -33,15 +33,20 @@ public class AuthWebTests extends WebTestBase {
         RegisterRequest data = TestUsers.randomRegisterRequest();
 
         RegisterPage registerPage = new RegisterPage().openPage();
-        registerPage.submitCredentials(data.getEmail(), data.getPassword());
-        webdriver().shouldHave(urlContaining("/username"));
-        registerPage.submitUsername(data.getUsername());
+        try {
+            registerPage.submitCredentials(data.getEmail(), data.getPassword());
+            webdriver().shouldHave(urlContaining("/username"));
+            registerPage.submitUsername(data.getUsername());
 
-        new TasksPage().waitLoaded()
-                .checkCharacterName(data.getUsername());
-
-        step("Очистка: удалить созданного пользователя через API", () ->
-                AuthApi.deleteUser(BrowserSession.currentUser(data.getUsername(), data.getPassword())));
+            new TasksPage().waitLoaded()
+                    .checkCharacterName(data.getUsername());
+        } finally {
+            step("Очистка: удалить созданного пользователя через API", () -> {
+                if (BrowserSession.hasSession()) {
+                    AuthApi.deleteUser(BrowserSession.currentUser(data.getUsername(), data.getPassword()));
+                }
+            });
+        }
     }
 
     @Test
