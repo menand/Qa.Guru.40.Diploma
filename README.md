@@ -32,6 +32,7 @@
 - [Запуск в Jenkins](#запуск-в-jenkins)
 - [GitHub Actions](#github-actions)
 - [Allure-отчёт](#allure-отчёт)
+- [Уведомления в Telegram](#уведомления-в-telegram)
 - [Структура проекта](#структура-проекта)
 
 ## Технологии и инструменты
@@ -229,6 +230,13 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 и page source, к мобильным — видео сессии BrowserStack.
 
 <p align="center"><img src="images/screenshots/allure_test_detail.png" alt="Allure test detail" width="900"/></p>
+
+## Уведомления в Telegram
+
+После каждого CI-прогона (и Jenkins, и GitHub Actions) в Telegram-чат приходит сводка:
+диаграмма, количество тестов, длительность и ссылка на Allure-отчёт.
+
+<p align="center"><img src="images/screenshots/telegram_notification.png" alt="Telegram notification" width="500"/></p>
 
 ## Структура проекта
 
