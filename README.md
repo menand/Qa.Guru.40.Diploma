@@ -13,8 +13,18 @@
 
 Проект покрывает продукт автотестами на трёх уровнях: **REST API**, **Web UI** и **мобильное Android-приложение**.
 
+## Где смотреть результаты
+
+| Где | Что |
+|---|---|
+| 📊 [Allure-отчёт](https://menand.github.io/Qa.Guru.40.Diploma/) | живой отчёт последнего CI-прогона: шаги, вложения, история |
+| ⚙️ [GitHub Actions](https://github.com/menand/Qa.Guru.40.Diploma/actions) | все прогоны, логи, запуск вручную |
+| 🏗️ [Jenkins](https://jenkins.autotests.cloud/job/C40-MENSHOV-DIPLOMA/) | джоба qa.guru: сборки + Allure-отчёт (нужен логин) |
+| 💬 Telegram | после каждого CI-прогона в чат приходит сводка с диаграммой и ссылкой на отчёт |
+
 ## Содержание
 
+- [Где смотреть результаты](#где-смотреть-результаты)
 - [Технологии и инструменты](#технологии-и-инструменты)
 - [Реализованные проверки](#реализованные-проверки)
 - [Особенности проекта](#особенности-проекта)
@@ -109,7 +119,8 @@
 ./gradlew web_test -Dbrowser=firefox -DbrowserSize=1280x1024        # другой браузер и размер окна
 ./gradlew web_test "-DremoteUrl=https://user:pass@selenoid.example.com/wd/hub" -DbrowserVersion=128   # Selenoid
 ./gradlew mobile_test                   # mobile на BrowserStack (нужны креды, см. ниже)
-./gradlew test                          # api + web (mobile исключён по умолчанию)
+./gradlew test                          # api + web одним прогоном
+./gradlew test mobile_test              # все 37 тестов в один Allure-отчёт
 ```
 
 | Свойство         | По умолчанию           | Назначение                                        |
@@ -122,21 +133,39 @@
 | `remoteUrl`      | *(пусто)*              | Selenoid/Grid; пусто — локальный браузер          |
 | `videoEnabled`   | `true`                 | запись видео в Selenoid (только с `remoteUrl`)    |
 
-Для мобильных тестов приложение должно быть загружено в BrowserStack
-(custom_id `habitica-android`, см. `browserstack.properties`), креды передаются через
-переменные окружения `BROWSERSTACK_USER` / `BROWSERSTACK_KEY`.
+Свойства мобильного слоя (дефолты — в `browserstack.properties` и `@DefaultValue` конфига):
+
+| Свойство            | По умолчанию                          | Назначение                          |
+|---------------------|---------------------------------------|-------------------------------------|
+| `BROWSERSTACK_USER` | *(обязателен)*                        | логин BrowserStack (env или `-D`)   |
+| `BROWSERSTACK_KEY`  | *(обязателен)*                        | access key BrowserStack             |
+| `app`               | `habitica-android`                    | custom_id загруженного apk          |
+| `device`            | `Google Pixel 7`                      | устройство фермы                    |
+| `osVersion`         | `13.0`                                | версия Android                      |
+| `appiumVersion`     | `2.6.0`                               | версия Appium на BrowserStack       |
+| `browserstackHub`   | `https://hub.browserstack.com/wd/hub` | hub App Automate                    |
+
+Приложение (официальный apk Habitica 4.4) должно быть загружено в аккаунт BrowserStack
+под custom_id `habitica-android`:
+
+```bash
+curl -u "USER:KEY" -X POST "https://api-cloud.browserstack.com/app-automate/upload" \
+  -F "file=@habitica-4.4.apk" -F "custom_id=habitica-android"
+```
 
 ## Запуск в Jenkins
 
-Параметризованная джоба (Active Choices / Choice Parameters):
+Джоба: **[C40-MENSHOV-DIPLOMA](https://jenkins.autotests.cloud/job/C40-MENSHOV-DIPLOMA/)** —
+параметризованная (Active Choices), с Allure-отчётом и Telegram-уведомлением после сборки:
 
-| Параметр          | Значения (Groovy return для Active Choices)                          |
-|-------------------|----------------------------------------------------------------------|
-| `TASK`            | `return ["web_test:selected", "api_test", "mobile_test", "test"]`   |
-| `BROWSER`         | `return ["chrome:selected", "firefox"]`                              |
-| `BROWSER_VERSION` | `return ["128:selected", "127", "125"]` — версии из вашего Selenoid  |
-| `BROWSER_SIZE`    | `return ["1920x1080:selected", "1280x1024", "1024x768"]`             |
-| `REMOTE_URL`      | строковый параметр, `https://user:pass@selenoid.example.com/wd/hub`  |
+| Параметр          | Значения (Groovy return для Active Choices)                                         |
+|-------------------|--------------------------------------------------------------------------------------|
+| `TASK`            | `return ["web_test:selected", "api_test", "mobile_test", "test"]`                   |
+| `BROWSER`         | `return ["chrome:selected", "firefox"]`                                              |
+| `BROWSER_VERSION` | каскад от `BROWSER`: chrome → `148.0/147.0/146.0/128.0`, firefox → `148.0–150.0`     |
+| `BROWSER_SIZE`    | `return ["1920x1080:selected", "1280x1024", "1024x768"]`                              |
+| `REMOTE_URL`      | строковый параметр, `https://user:pass@selenoid.autotests.cloud/wd/hub`               |
+| `BROWSERSTACK_*`  | креды BrowserStack для `mobile_test` (user — строка, key — password-параметр)         |
 
 Шаг сборки:
 
