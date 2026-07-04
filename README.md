@@ -241,21 +241,31 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 ## Структура проекта
 
 ```
-src/test/java            — api + web (без appium-зависимостей)
-├── api
-│   ├── models   — POJO-модели запросов/ответов (Lombok)
-│   ├── specs    — request/response-спецификации, Allure- и rate-limit-фильтры
-│   └── steps    — шаги API (AuthApi, UserApi, TasksApi, TagsApi)
-├── web/pages    — Page Object'ы веба (HomePage, LoginPage, RegisterPage, TasksPage)
-├── config       — Owner-конфиги (api / web / browserstack)
-├── helpers      — TestUsers, BrowserSession, Attachments
-└── tests
-    ├── api      — 15 тестов
-    └── web      — 17 тестов
+.github/workflows/tests.yml — CI GitHub Actions: тесты + Allure на Pages + Telegram
+build.gradle                — задачи api_test / web_test / mobile_test / test, retry, source set'ы
+images/                     — логотипы и скриншоты для этого README
 
-src/mobileTest/java      — отдельный source set с selenide-appium
+src/test/java               — api + web (без appium-зависимостей)
+├── api
+│   ├── models      — POJO-модели запросов/ответов (Lombok), enum'ы TaskType / ScoreDirection
+│   ├── specs       — request/response-спецификации, Allure- и rate-limit-фильтры
+│   └── steps       — шаги API (AuthApi, UserApi, TasksApi, TagsApi)
+├── web/pages       — Page Object'ы веба (HomePage, LoginPage, RegisterPage, TasksPage)
+├── config          — Owner-конфиги (api / web / browserstack)
+├── helpers         — TestUsers (общий пользователь), BrowserSession (localStorage-авторизация),
+│                     Attachments (видео BrowserStack)
+└── tests
+    ├── api         — 15 тестов (Auth, User, Tasks, Tags)
+    └── web         — 17 тестов (HomePage, Auth, Tasks)
+
+src/test/resources
+├── config/*.properties — дефолты конфигов api / web / browserstack
+├── categories.json     — кастомные категории Allure (в т.ч. «Rate limit Habitica»)
+└── allure.properties   — каталог результатов Allure
+
+src/mobileTest/java         — отдельный source set с selenide-appium
 ├── mobile
-│   ├── drivers  — BrowserstackDriver (Appium / App Automate)
-│   └── screens  — Page Object'ы мобильного приложения (Intro, Login, Main)
-└── tests/mobile — 5 смоук-тестов
+│   ├── drivers     — BrowserstackDriver (Appium / App Automate)
+│   └── screens     — Page Object'ы мобильного приложения (Intro, Login, Main)
+└── tests/mobile    — 5 смоук-тестов (Onboarding, Auth)
 ```
