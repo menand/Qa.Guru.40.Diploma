@@ -24,10 +24,15 @@ public interface BrowserstackConfig extends Config {
     @Key("app")
     String app();
 
-    @Key("device")
-    String device();
+    /** Профиль устройства: pixel / samsung / xiaomi (см. device.* в browserstack.properties). */
+    @Key("phone")
+    @DefaultValue("pixel")
+    String phone();
 
-    @Key("osVersion")
+    @Key("device.${phone}.name")
+    String deviceName();
+
+    @Key("device.${phone}.osVersion")
     String osVersion();
 
     @Key("appiumVersion")

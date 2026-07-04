@@ -23,7 +23,7 @@ public class BrowserstackDriver implements WebDriverProvider {
         caps.setCapability("platformName", "android");
         caps.setCapability("appium:automationName", "UiAutomator2");
         caps.setCapability("appium:app", Configs.BROWSERSTACK.app());
-        caps.setCapability("appium:deviceName", Configs.BROWSERSTACK.device());
+        caps.setCapability("appium:deviceName", Configs.BROWSERSTACK.deviceName());
         caps.setCapability("appium:platformVersion", Configs.BROWSERSTACK.osVersion());
         caps.setCapability("bstack:options", Map.of(
                 "userName", Configs.BROWSERSTACK.user(),

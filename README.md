@@ -140,10 +140,17 @@
 | `BROWSERSTACK_USER` | *(обязателен)*                        | логин BrowserStack (env или `-D`)   |
 | `BROWSERSTACK_KEY`  | *(обязателен)*                        | access key BrowserStack             |
 | `app`               | `habitica-android`                    | custom_id загруженного apk          |
-| `device`            | `Google Pixel 7`                      | устройство фермы                    |
-| `osVersion`         | `13.0`                                | версия Android                      |
+| `phone`             | `pixel`                               | профиль устройства (см. ниже)       |
 | `appiumVersion`     | `2.6.0`                               | версия Appium на BrowserStack       |
 | `browserstackHub`   | `https://hub.browserstack.com/wd/hub` | hub App Automate                    |
+
+Профили устройств (`-Dphone=...`, набор расширяется в `browserstack.properties`):
+
+| Профиль   | Устройство           | Android |
+|-----------|----------------------|---------|
+| `pixel`   | Google Pixel 7       | 13.0    |
+| `samsung` | Samsung Galaxy S22   | 12.0    |
+| `xiaomi`  | Xiaomi Redmi Note 11 | 11.0    |
 
 Приложение (официальный apk Habitica 4.4) должно быть загружено в аккаунт BrowserStack
 под custom_id `habitica-android`:
@@ -164,6 +171,7 @@ curl -u "USER:KEY" -X POST "https://api-cloud.browserstack.com/app-automate/uplo
 | `BROWSER`         | `return ["chrome:selected", "firefox"]`                                              |
 | `BROWSER_VERSION` | каскад от `BROWSER`: chrome → `148.0/147.0/146.0/128.0`, firefox → `148.0–150.0`     |
 | `BROWSER_SIZE`    | `return ["1920x1080:selected", "1280x1024", "1024x768"]`                              |
+| `PHONE`           | `return ["pixel:selected", "samsung", "xiaomi"]` — устройство для `mobile_test`       |
 | `REMOTE_URL`      | строковый параметр, `https://user:pass@selenoid.autotests.cloud/wd/hub`               |
 | `BROWSERSTACK_*`  | креды BrowserStack для `mobile_test` (user — строка, key — password-параметр)         |
 
@@ -191,7 +199,8 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 - **вручную** (Run workflow) запускается любой слой: `api_test` / `web_test` / `mobile_test` /
   `test` (api+web) / `all` (все 37 тестов одним прогоном в общий отчёт);
 - web-тесты идут в headless Chrome самого раннера — Selenoid не нужен;
-- mobile-тесты ходят в BrowserStack (креды в GitHub Secrets);
+- mobile-тесты ходят в BrowserStack (креды в GitHub Secrets), устройство выбирается
+  вторым параметром запуска (`pixel` / `samsung` / `xiaomi`);
 - после прогона Allure-отчёт с историей публикуется на
   [GitHub Pages](https://menand.github.io/Qa.Guru.40.Diploma/), в Telegram уходит уведомление.
 
