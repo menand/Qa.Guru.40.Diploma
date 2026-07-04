@@ -20,7 +20,7 @@
 | 📊 [Allure-отчёт](https://menand.github.io/Qa.Guru.40.Diploma/) | живой отчёт последнего CI-прогона: шаги, вложения, история |
 | ⚙️ [GitHub Actions](https://github.com/menand/Qa.Guru.40.Diploma/actions) | все прогоны, логи, запуск вручную |
 | 🏗️ [Jenkins](https://jenkins.autotests.cloud/job/C40-MENSHOV-DIPLOMA/) | джоба qa.guru: сборки + Allure-отчёт (нужен логин) |
-| 💬 Telegram | после каждого CI-прогона в чат приходит сводка с диаграммой и ссылкой на отчёт |
+| 💬 [Telegram @QaGuru40](https://t.me/QaGuru40) | после каждого CI-прогона в канал приходит сводка с диаграммой и ссылкой на отчёт |
 
 ## Содержание
 
@@ -233,8 +233,9 @@ Allure-плагин Jenkins публикует отчёт из `build/allure-res
 
 ## Уведомления в Telegram
 
-После каждого CI-прогона (и Jenkins, и GitHub Actions) в Telegram-чат приходит сводка:
-диаграмма, количество тестов, длительность и ссылка на Allure-отчёт.
+После каждого CI-прогона (и Jenkins, и GitHub Actions) в канал
+[@QaGuru40](https://t.me/QaGuru40) приходит сводка: диаграмма, количество тестов,
+длительность и ссылка на Allure-отчёт.
 
 <p align="center"><img src="images/screenshots/telegram_notification.png" alt="Telegram notification" width="500"/></p>
 
