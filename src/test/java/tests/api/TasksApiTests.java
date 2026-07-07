@@ -1,5 +1,6 @@
 package tests.api;
 
+import api.ApiErrors;
 import api.models.ErrorResponse;
 import api.models.HabiticaTask;
 import api.models.ScoreDirection;
@@ -8,12 +9,12 @@ import api.models.TaskType;
 import api.models.UserProfile;
 import api.steps.TasksApi;
 import api.steps.UserApi;
+import helpers.TestData;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,18 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Link(name = "Habitica API doc", url = "https://habitica.com/apidoc/")
 public class TasksApiTests extends ApiTestBase {
 
-    private static final Faker FAKER = new Faker();
-
-    private String randomTaskText() {
-        return "Дипломная задача: " + FAKER.book().title();
-    }
-
     @Test
     @Story("Создание задач")
     @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Создание todo возвращает задачу с id, типом и исходным текстом")
     void createTodoReturnsTask() {
-        String text = randomTaskText();
+        String text = TestData.randomTaskTitle();
 
         HabiticaTask task = TasksApi.createTask(USER, text, TaskType.TODO);
 
@@ -59,7 +54,7 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("Создание habit возвращает задачу типа habit")
     void createHabitReturnsTask() {
-        String text = randomTaskText();
+        String text = TestData.randomTaskTitle();
 
         HabiticaTask task = TasksApi.createTask(USER, text, TaskType.HABIT);
 
@@ -80,7 +75,7 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("GET /tasks/user содержит созданную задачу")
     void taskListContainsCreatedTask() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
+        HabiticaTask created = TasksApi.createTask(USER, TestData.randomTaskTitle(), TaskType.TODO);
 
         List<HabiticaTask> tasks = TasksApi.getUserTasks(USER);
 
@@ -99,8 +94,8 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("PUT /tasks/:id меняет текст задачи")
     void updateTaskChangesText() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
-        String newText = randomTaskText();
+        HabiticaTask created = TasksApi.createTask(USER, TestData.randomTaskTitle(), TaskType.TODO);
+        String newText = TestData.randomTaskTitle();
 
         HabiticaTask updated = TasksApi.updateTaskText(USER, created.getId(), newText);
 
@@ -117,7 +112,7 @@ public class TasksApiTests extends ApiTestBase {
     @DisplayName("Score todo вверх помечает задачу выполненной и начисляет опыт и золото")
     void scoreTodoUpGivesReward() {
         UserProfile.Stats before = UserApi.getUser(USER).getStats();
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
+        HabiticaTask created = TasksApi.createTask(USER, TestData.randomTaskTitle(), TaskType.TODO);
 
         ScoreResult result = TasksApi.scoreTask(USER, created.getId(), ScoreDirection.UP);
 
@@ -140,15 +135,15 @@ public class TasksApiTests extends ApiTestBase {
     @Severity(SeverityLevel.CRITICAL)
     @DisplayName("Удалённая задача недоступна: повторный GET возвращает 404 NotFound")
     void deletedTaskIsNotFound() {
-        HabiticaTask created = TasksApi.createTask(USER, randomTaskText(), TaskType.TODO);
+        HabiticaTask created = TasksApi.createTask(USER, TestData.randomTaskTitle(), TaskType.TODO);
 
         TasksApi.deleteTask(USER, created.getId());
         ErrorResponse error = TasksApi.getTaskExpectingError(USER, created.getId(), 404);
 
         step("Проверить 404 по удалённой задаче", () -> {
             assertThat(error.getSuccess()).isFalse();
-            assertThat(error.getError()).isEqualTo("NotFound");
-            assertThat(error.getMessage()).isEqualTo("Task not found.");
+            assertThat(error.getError()).isEqualTo(ApiErrors.NOT_FOUND);
+            assertThat(error.getMessage()).isEqualTo(ApiErrors.TASK_NOT_FOUND);
         });
     }
 }

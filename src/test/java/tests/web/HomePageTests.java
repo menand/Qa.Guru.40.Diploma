@@ -21,6 +21,8 @@ import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 public class HomePageTests extends WebTestBase {
 
     private final HomePage homePage = new HomePage();
+    private final LoginPage loginPage = new LoginPage();
+    private final RegisterPage registerPage = new RegisterPage();
 
     @Test
     @Story("Контент лендинга")
@@ -40,7 +42,7 @@ public class HomePageTests extends WebTestBase {
         homePage.openPage().goToLogin();
 
         webdriver().shouldHave(urlContaining("/login"));
-        new LoginPage().checkLoginFormVisible();
+        loginPage.checkLoginFormVisible();
     }
 
     @Test
@@ -51,7 +53,7 @@ public class HomePageTests extends WebTestBase {
         homePage.openPage().goToRegister();
 
         webdriver().shouldHave(urlContaining("/register"));
-        new RegisterPage().checkRegisterFormVisible();
+        registerPage.checkRegisterFormVisible();
     }
 
     @Test

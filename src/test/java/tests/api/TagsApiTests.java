@@ -2,12 +2,12 @@ package tests.api;
 
 import api.models.TagModel;
 import api.steps.TagsApi;
+import helpers.TestData;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
-import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,14 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Link(name = "Habitica API doc", url = "https://habitica.com/apidoc/")
 public class TagsApiTests extends ApiTestBase {
 
-    private static final Faker FAKER = new Faker();
-
     @Test
     @Story("Создание тегов")
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("Созданный тег возвращается с id и появляется в списке тегов")
     void createdTagAppearsInList() {
-        String name = "tag-" + FAKER.color().name();
+        String name = TestData.randomTagName();
 
         TagModel created = TagsApi.createTag(USER, name);
         List<TagModel> tags = TagsApi.getTags(USER);
@@ -43,21 +41,31 @@ public class TagsApiTests extends ApiTestBase {
     }
 
     @Test
-    @Story("Редактирование и удаление тегов")
+    @Story("Редактирование тегов")
     @Severity(SeverityLevel.MINOR)
-    @DisplayName("Тег можно переименовать, после удаления он исчезает из списка")
-    void tagCanBeRenamedAndDeleted() {
-        TagModel created = TagsApi.createTag(USER, "tag-" + FAKER.animal().name());
-        String newName = "renamed-" + FAKER.color().name();
+    @DisplayName("PUT /tags/:id переименовывает тег, id остаётся прежним")
+    void tagCanBeRenamed() {
+        TagModel created = TagsApi.createTag(USER, TestData.randomTagName());
+        String newName = TestData.randomTagNewName();
 
         TagModel renamed = TagsApi.updateTag(USER, created.getId(), newName);
+
         step("Проверить новое имя тега; id не изменился", () -> {
             assertThat(renamed.getId()).isEqualTo(created.getId());
             assertThat(renamed.getName()).isEqualTo(newName);
         });
+    }
+
+    @Test
+    @Story("Удаление тегов")
+    @Severity(SeverityLevel.MINOR)
+    @DisplayName("Удалённый тег исчезает из списка тегов")
+    void tagCanBeDeleted() {
+        TagModel created = TagsApi.createTag(USER, TestData.randomTagName());
 
         TagsApi.deleteTag(USER, created.getId());
         List<TagModel> tags = TagsApi.getTags(USER);
+
         step("Проверить, что тег удалён", () ->
                 assertThat(tags)
                         .extracting(TagModel::getId)

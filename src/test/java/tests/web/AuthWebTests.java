@@ -1,5 +1,6 @@
 package tests.web;
 
+import api.ApiErrors;
 import api.models.RegisterRequest;
 import api.models.UserCredentials;
 import api.steps.AuthApi;
@@ -25,6 +26,10 @@ import static io.qameta.allure.Allure.step;
 @Link(name = "Habitica home", url = "https://habitica.com/static/home")
 public class AuthWebTests extends WebTestBase {
 
+    private final LoginPage loginPage = new LoginPage();
+    private final RegisterPage registerPage = new RegisterPage();
+    private final TasksPage tasksPage = new TasksPage();
+
     @Test
     @Story("Регистрация")
     @Severity(SeverityLevel.BLOCKER)
@@ -32,13 +37,13 @@ public class AuthWebTests extends WebTestBase {
     void uiRegistrationCreatesNewUser() {
         RegisterRequest data = TestUsers.randomRegisterRequest();
 
-        RegisterPage registerPage = new RegisterPage().openPage();
+        registerPage.openPage();
         try {
             registerPage.submitCredentials(data.getEmail(), data.getPassword());
             webdriver().shouldHave(urlContaining("/username"));
             registerPage.submitUsername(data.getUsername());
 
-            new TasksPage().waitLoaded()
+            tasksPage.waitLoaded()
                     .checkCharacterName(data.getUsername());
         } finally {
             step("Очистка: удалить созданного пользователя через API", () -> {
@@ -59,9 +64,9 @@ public class AuthWebTests extends WebTestBase {
         // потому что API-тесты в объединённом прогоне могут его переименовать
         String displayName = UserApi.getUser(user).getProfile().getName();
 
-        new LoginPage().openPage().login(user.getUsername(), user.getPassword());
+        loginPage.openPage().login(user.getUsername(), user.getPassword());
 
-        new TasksPage().waitLoaded().checkCharacterName(displayName);
+        tasksPage.waitLoaded().checkCharacterName(displayName);
     }
 
     @Test
@@ -71,10 +76,9 @@ public class AuthWebTests extends WebTestBase {
     void loginWithWrongPasswordShowsError() {
         UserCredentials user = webUser();
 
-        new LoginPage().openPage()
+        loginPage.openPage()
                 .login(user.getUsername(), "wrong-password-123")
-                .checkErrorNotification("Your email, username, or password are incorrect. "
-                        + "Please try again or use \"Forgot Password.\"");
+                .checkErrorNotification(ApiErrors.INVALID_CREDENTIALS);
 
         webdriver().shouldHave(urlContaining("/login"));
     }

@@ -1,5 +1,6 @@
 package tests.api;
 
+import api.ApiErrors;
 import api.models.ErrorResponse;
 import api.models.RegisterRequest;
 import api.models.UserCredentials;
@@ -54,8 +55,8 @@ public class AuthApiTests extends ApiTestBase {
 
         step("Проверить ответ об ошибке", () -> {
             assertThat(error.getSuccess()).isFalse();
-            assertThat(error.getError()).isEqualTo("NotAuthorized");
-            assertThat(error.getMessage()).isEqualTo("Username already taken.");
+            assertThat(error.getError()).isEqualTo(ApiErrors.NOT_AUTHORIZED);
+            assertThat(error.getMessage()).isEqualTo(ApiErrors.USERNAME_TAKEN);
         });
     }
 
@@ -80,10 +81,8 @@ public class AuthApiTests extends ApiTestBase {
         ErrorResponse error = AuthApi.loginExpectingError(USER.getUsername(), "wrong-password-123", 401);
 
         step("Проверить ответ об ошибке", () -> {
-            assertThat(error.getError()).isEqualTo("NotAuthorized");
-            assertThat(error.getMessage()).isEqualTo(
-                    "Your email, username, or password are incorrect. "
-                            + "Please try again or use \"Forgot Password.\"");
+            assertThat(error.getError()).isEqualTo(ApiErrors.NOT_AUTHORIZED);
+            assertThat(error.getMessage()).isEqualTo(ApiErrors.INVALID_CREDENTIALS);
         });
     }
 
@@ -95,8 +94,8 @@ public class AuthApiTests extends ApiTestBase {
         ErrorResponse error = UserApi.getUserWithoutAuth(401);
 
         step("Проверить ответ об ошибке", () -> {
-            assertThat(error.getError()).isEqualTo("NotAuthorized");
-            assertThat(error.getMessage()).isEqualTo("Missing authentication headers.");
+            assertThat(error.getError()).isEqualTo(ApiErrors.NOT_AUTHORIZED);
+            assertThat(error.getMessage()).isEqualTo(ApiErrors.MISSING_AUTH_HEADERS);
         });
     }
 }
