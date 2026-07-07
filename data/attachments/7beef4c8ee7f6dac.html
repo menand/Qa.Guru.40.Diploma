@@ -1,0 +1,28 @@
+<div>POST to https://habitica.com/api/v3/user/auth/local/login</div>
+
+    <h4>Body</h4>
+    <div>
+    <pre class="preformated-text">
+{
+    &quot;password&quot;: &quot;wrong-password-123&quot;,
+    &quot;username&quot;: &quot;qa_5qu4l3bsdr&quot;
+}    </pre>
+    </div>
+
+    <h4>Headers</h4>
+    <div>
+            <div>Accept: */*</div>
+            <div>x-client: habitica-diploma-tests</div>
+            <div>Content-Type: application/json</div>
+    </div>
+
+
+
+    <h4>Curl</h4>
+    <div>
+        curl -v -X POST &#39;https://habitica.com/api/v3/user/auth/local/login&#39; -H &#39;Accept: */*&#39; -H &#39;x-client: habitica-diploma-tests&#39; -H &#39;Content-Type: application/json&#39; -d &#39;{
+    &quot;password&quot;: &quot;wrong-password-123&quot;,
+    &quot;username&quot;: &quot;qa_5qu4l3bsdr&quot;
+}&#39;
+    </div>
+
