@@ -1,7 +1,10 @@
 package tests.api;
 
+import api.models.UserCredentials;
 import api.models.UserProfile;
+import api.steps.AuthApi;
 import api.steps.UserApi;
+import helpers.TestData;
 import helpers.TestUsers;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Link;
@@ -31,10 +34,28 @@ public class UserApiTests extends ApiTestBase {
             assertThat(profile.getAuth().getLocal().getEmail())
                     .isEqualTo(USER.getUsername() + TestUsers.EMAIL_DOMAIN);
         });
-        step("Проверить стартовые статы свежего аккаунта", () -> {
-            assertThat(profile.getStats().getLvl()).isEqualTo(1);
-            assertThat(profile.getStats().getHp()).isEqualTo(50.0);
-        });
+    }
+
+    @Test
+    @Story("Просмотр профиля")
+    @Severity(SeverityLevel.NORMAL)
+    @DisplayName("Свежий аккаунт создаётся со стартовыми статами: уровень 1, 50 HP, 0 опыта и золота")
+    void freshAccountHasStartStats() {
+        // общий USER мутируется другими тестами (скоринг даёт опыт) — статы проверяем на свежем аккаунте
+        UserCredentials fresh = AuthApi.register(TestUsers.randomRegisterRequest());
+
+        try {
+            UserProfile profile = UserApi.getUser(fresh);
+
+            step("Проверить стартовые статы", () -> {
+                assertThat(profile.getStats().getLvl()).isEqualTo(1);
+                assertThat(profile.getStats().getHp()).isEqualTo(50.0);
+                assertThat(profile.getStats().getExp()).isEqualTo(0.0);
+                assertThat(profile.getStats().getGp()).isEqualTo(0.0);
+            });
+        } finally {
+            step("Очистка: удалить свежий аккаунт", () -> AuthApi.deleteUserQuietly(fresh));
+        }
     }
 
     @Test
@@ -42,7 +63,7 @@ public class UserApiTests extends ApiTestBase {
     @Severity(SeverityLevel.NORMAL)
     @DisplayName("PUT /user меняет отображаемое имя пользователя")
     void updateDisplayNameChangesProfileName() {
-        String newName = "Дипломант " + USER.getUsername().substring(3, 9);
+        String newName = TestData.randomDisplayName();
 
         UserProfile updated = UserApi.updateDisplayName(USER, newName);
 

@@ -12,14 +12,16 @@ repositories {
 }
 
 def allureVersion = '2.29.1',
+    // у allure-commandline нет релиза 2.29.1 — версия отчёта отдельно (та же, что в CI)
+    allureReportVersion = '2.29.0',
     selenideVersion = '7.7.3',
     restAssuredVersion = '5.5.0',
     junitVersion = '5.11.4',
-    appiumVersion = '9.3.0'
+    appiumVersion = '9.4.0'
 
 allure {
     report {
-        version.set(allureVersion)
+        version.set(allureReportVersion)
     }
     adapter {
         aspectjWeaver.set(true)
@@ -87,6 +89,12 @@ tasks.withType(Test).configureEach {
             into 'build/allure-results'
         }
     }
+}
+
+// copyCategories из allure-плагина падает на Gradle 8.14 (marker-путь создаётся каталогом);
+// categories.json мы кладём в allure-results сами в каждом Test-таске
+tasks.matching { it.name == 'copyCategories' }.configureEach {
+    enabled = false
 }
 
 // объединённый прогон api+web (gradlew test) тоже идёт против живого стенда — ретраим флейки

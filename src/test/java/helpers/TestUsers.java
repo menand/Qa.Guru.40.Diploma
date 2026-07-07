@@ -20,12 +20,14 @@ public final class TestUsers {
     /**
      * Один общий пользователь на весь прогон: экономим rate-limit Habitica (30 req/min)
      * и не мусорим аккаунтами. Удаляется по завершении JVM.
+     * Прогон однопоточный by design — при включении параллельного JUnit общий
+     * пользователь и статические поля страниц потребуют пересмотра.
      */
     public static synchronized UserCredentials shared() {
         if (shared == null) {
             shared = registerWithRateLimitRetry();
             UserCredentials toDelete = shared;
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> AuthApi.deleteUser(toDelete)));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> AuthApi.deleteUserQuietly(toDelete)));
         }
         return shared;
     }

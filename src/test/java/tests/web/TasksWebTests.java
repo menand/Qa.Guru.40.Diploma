@@ -3,6 +3,7 @@ package tests.web;
 import api.models.TaskType;
 import helpers.TestData;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import web.pages.TasksPage;
 
 @Feature("Управление задачами")
+@Link(name = "Habitica home", url = "https://habitica.com/static/home")
 public class TasksWebTests extends WebTestBase {
 
     private final TasksPage tasksPage = new TasksPage();

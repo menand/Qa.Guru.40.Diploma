@@ -48,7 +48,7 @@ public class AuthWebTests extends WebTestBase {
         } finally {
             step("Очистка: удалить созданного пользователя через API", () -> {
                 if (BrowserSession.hasSession()) {
-                    AuthApi.deleteUser(BrowserSession.currentUser(data.getUsername(), data.getPassword()));
+                    AuthApi.deleteUserQuietly(BrowserSession.currentUser(data.getUsername(), data.getPassword()));
                 }
             });
         }

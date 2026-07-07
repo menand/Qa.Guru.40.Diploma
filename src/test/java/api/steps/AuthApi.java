@@ -77,6 +77,19 @@ public final class AuthApi {
                 .spec(ApiSpecs.status(200));
     }
 
+    /**
+     * Очистка в finally/shutdown hook: сбой удаления не должен маскировать
+     * настоящую причину падения теста (исключение из finally заменяет исходное).
+     */
+    public static void deleteUserQuietly(UserCredentials user) {
+        try {
+            deleteUser(user);
+        } catch (RuntimeException | AssertionError e) {
+            System.err.println("Не удалось удалить тестовый аккаунт "
+                    + user.getUsername() + ": " + e.getMessage());
+        }
+    }
+
     private static String extractUserId(Response response) {
         String id = response.path("data.id");
         return id != null ? id : response.path("data._id");

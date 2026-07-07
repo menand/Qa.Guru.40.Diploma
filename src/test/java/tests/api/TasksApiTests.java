@@ -120,8 +120,9 @@ public class TasksApiTests extends ApiTestBase {
             assertThat(result.getDelta()).isEqualTo(1.0);
             assertThat(result.getExp()).isGreaterThanOrEqualTo(before.getExp() + 6);
             assertThat(result.getGp()).isGreaterThanOrEqualTo(before.getGp() + 1);
-            assertThat(result.getLvl()).isEqualTo(1);
-            assertThat(result.getHp()).isEqualTo(50.0);
+            // сравниваем с состоянием до скоринга: общий пользователь накапливает опыт от других тестов
+            assertThat(result.getLvl()).isEqualTo(before.getLvl());
+            assertThat(result.getHp()).isEqualTo(before.getHp());
         });
         step("Проверить, что задача помечена выполненной, а её ценность выросла до 1", () -> {
             HabiticaTask scored = TasksApi.getTask(USER, created.getId());

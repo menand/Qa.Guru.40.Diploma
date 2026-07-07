@@ -22,7 +22,12 @@ public final class ApiSpecs {
                 .build();
     }
 
-    /** Спека авторизованного пользователя: заголовки x-api-user / x-api-key. */
+    /**
+     * Спека авторизованного пользователя: заголовки x-api-user / x-api-key.
+     * AllureRestAssured прикладывает запросы (включая auth-заголовки) в отчёт,
+     * который публикуется на GitHub Pages. Осознанный компромисс: пользователь
+     * одноразовый и удаляется в конце прогона — токен мёртв к моменту публикации.
+     */
     public static RequestSpecification authSpec(UserCredentials user) {
         return baseBuilder()
                 .addFilter(new AllureRestAssured())

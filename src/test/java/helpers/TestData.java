@@ -33,4 +33,8 @@ public final class TestData {
     public static String randomTagNewName() {
         return "renamed-" + FAKER.color().name();
     }
+
+    public static String randomDisplayName() {
+        return "Дипломант " + FAKER.regexify("[a-z0-9]{6}");
+    }
 }

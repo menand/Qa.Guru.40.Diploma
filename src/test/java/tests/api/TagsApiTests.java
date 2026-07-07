@@ -44,7 +44,7 @@ public class TagsApiTests extends ApiTestBase {
     @Story("Редактирование тегов")
     @Severity(SeverityLevel.MINOR)
     @DisplayName("PUT /tags/:id переименовывает тег, id остаётся прежним")
-    void tagCanBeRenamed() {
+    void renamedTagKeepsId() {
         TagModel created = TagsApi.createTag(USER, TestData.randomTagName());
         String newName = TestData.randomTagNewName();
 
@@ -60,7 +60,7 @@ public class TagsApiTests extends ApiTestBase {
     @Story("Удаление тегов")
     @Severity(SeverityLevel.MINOR)
     @DisplayName("Удалённый тег исчезает из списка тегов")
-    void tagCanBeDeleted() {
+    void deletedTagDisappearsFromList() {
         TagModel created = TagsApi.createTag(USER, TestData.randomTagName());
 
         TagsApi.deleteTag(USER, created.getId());

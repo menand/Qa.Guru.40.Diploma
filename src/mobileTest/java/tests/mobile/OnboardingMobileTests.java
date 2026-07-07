@@ -1,6 +1,7 @@
 package tests.mobile;
 
 import io.qameta.allure.Feature;
+import io.qameta.allure.Link;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Story;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @Feature("Онбординг в мобильном приложении")
+@Link(name = "Habitica 4.4 apk", url = "https://github.com/HabitRPG/habitica-android/releases/tag/4.4")
 public class OnboardingMobileTests extends MobileTestBase {
 
     @Test

@@ -37,7 +37,7 @@ public class AuthApiTests extends ApiTestBase {
                 assertThat(created.getApiToken()).matches(UUID_REGEX);
             });
         } finally {
-            step("Очистка: удалить созданный аккаунт", () -> AuthApi.deleteUser(created));
+            step("Очистка: удалить созданный аккаунт", () -> AuthApi.deleteUserQuietly(created));
         }
     }
 
